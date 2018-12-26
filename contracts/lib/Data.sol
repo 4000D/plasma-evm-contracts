@@ -82,22 +82,23 @@ library Data {
     function() returns(uint64,uint64,uint64) _getLatestRequestInfo
   ) internal returns (bool isEmpty) {
     require(!_cur.rebased);
-    Epoch storage curEpoch = _cur.epochs[_cur.lastEpoch];
+
+    Epoch storage epoch = _cur.epochs[_cur.lastEpoch];
 
     // check preivous URE
-    require(curEpoch.isRequest && curEpoch.userActivated);
+    require(epoch.isRequest && epoch.userActivated);
 
-    _cur.lastEpoch += 1;
+    uint64 nextEpochNumber = _cur.lastEpoch + 1;
 
     uint forkedEpochNumber = _pre.blocks[_pre.forkedBlock].epochNumber;
 
     // prepare ORE' which covers all ORBs in previous fork but excludes exit requests.
-    curEpoch = _cur.epochs[_cur.lastEpoch];
+    epoch = _cur.epochs[nextEpochNumber];
 
-    curEpoch.initialized = true;
-    curEpoch.isRequest = true;
-    curEpoch.rebase = true;
-    curEpoch.timestamp = uint64(block.timestamp);
+    epoch.initialized = true;
+    epoch.isRequest = true;
+    epoch.rebase = true;
+    epoch.timestamp = uint64(block.timestamp);
 
     uint firstEpochNumber = _pre.epochs[forkedEpochNumber].isRequest ?
       forkedEpochNumber :
@@ -107,27 +108,27 @@ library Data {
     // uint lastEpochNumber = getLastEpochNumber(_pre, true);
 
     // // copy firstRequestBlockId from prefious fork even though the request block has no enter
-    // curEpoch.firstRequestBlockId = _pre.epochs[lastEpochNumber].firstRequestBlockId;
+    // epoch.firstRequestBlockId = _pre.epochs[lastEpochNumber].firstRequestBlockId;
 
-    (curEpoch.firstRequestBlockId, curEpoch.requestStart, curEpoch.requestEnd) = _getLatestRequestInfo();
+    (epoch.firstRequestBlockId, epoch.requestStart, epoch.requestEnd) = _getLatestRequestInfo();
 
     // short circuit if there is no ORE at all.
     if (!_pre.epochs[firstEpochNumber].initialized) {
-      curEpoch.isEmpty = true;
-      curEpoch.startBlockNumber = _cur.lastBlock;
-      curEpoch.endBlockNumber = _cur.lastBlock;
+      epoch.isEmpty = true;
+      epoch.startBlockNumber = _cur.lastBlock;
+      epoch.endBlockNumber = _cur.lastBlock;
       return true;
     }
 
     assert(_pre.epochs[firstEpochNumber].isRequest);
 
-    curEpoch.isEmpty = forkedEpochNumber > _pre.lastEnterEpoch;
+    epoch.isEmpty = forkedEpochNumber > _pre.lastEnterEpoch;
 
     // short circut if the epoch is empty
-    if (curEpoch.isEmpty) {
+    if (epoch.isEmpty) {
       // get ready to prepare NRE'
-      curEpoch.startBlockNumber = _cur.lastBlock;
-      curEpoch.endBlockNumber = _cur.lastBlock;
+      epoch.startBlockNumber = _cur.lastBlock;
+      epoch.endBlockNumber = _cur.lastBlock;
       return true;
     }
 
@@ -137,7 +138,7 @@ library Data {
       firstEnterEpoch += 2;
     }
 
-    curEpoch.startBlockNumber = _cur.lastBlock.add64(1);
+    epoch.startBlockNumber = _cur.lastBlock.add64(1);
 
     uint preBlockNumber = _pre.epochs[firstEnterEpoch].startBlockNumber;
 
@@ -161,23 +162,23 @@ library Data {
     Fork storage _pre
   ) internal returns (bool isEmpty) {
     require(!_cur.rebased);
-    Epoch storage curEpoch = _cur.epochs[_cur.lastEpoch];
+    Epoch storage epoch = _cur.epochs[_cur.lastEpoch];
 
-    require(curEpoch.rebase && curEpoch.isRequest && !curEpoch.userActivated);
+    require(epoch.rebase && epoch.isRequest && !epoch.userActivated);
 
     // set end block number of ORE' because it is 0. see EpochPrepared event.
     _cur.epochs[_cur.lastEpoch].endBlockNumber = _cur.lastBlock;
 
-    _cur.lastEpoch += 1;
+    uint64 nextEpochNumber = _cur.lastEpoch + 1;
 
     uint forkedEpochNumber = _pre.blocks[_pre.forkedBlock].epochNumber;
 
     // prepare NRE'
-    curEpoch = _cur.epochs[_cur.lastEpoch];
+    epoch = _cur.epochs[nextEpochNumber];
 
-    curEpoch.initialized = true;
-    curEpoch.rebase = true;
-    curEpoch.timestamp = uint64(block.timestamp);
+    epoch.initialized = true;
+    epoch.rebase = true;
+    epoch.timestamp = uint64(block.timestamp);
 
     uint previousNRENumber = !_pre.epochs[forkedEpochNumber].isRequest ?
       forkedEpochNumber :
@@ -185,16 +186,16 @@ library Data {
 
     // short circuit if there is no NRE to rebase at all.
     if (!_pre.epochs[previousNRENumber].initialized) {
-      curEpoch.startBlockNumber = _cur.lastBlock;
-      curEpoch.endBlockNumber = _cur.lastBlock;
-      curEpoch.isEmpty = true;
+      epoch.startBlockNumber = _cur.lastBlock;
+      epoch.endBlockNumber = _cur.lastBlock;
+      epoch.isEmpty = true;
       _cur.rebased = true;
       return true;
     }
 
     assert(!_pre.epochs[previousNRENumber].isRequest);
 
-    curEpoch.startBlockNumber = _cur.lastBlock.add64(1);
+    epoch.startBlockNumber = _cur.lastBlock.add64(1);
     _cur.nextBlockToRebase = previousNRENumber == forkedEpochNumber ?
       _pre.forkedBlock :
       _pre.epochs[previousNRENumber].startBlockNumber;
@@ -218,12 +219,18 @@ library Data {
     returns (uint epochNumber, uint blockNumber)
   {
     epochNumber = _f.lastEpoch;
+    blockNumber = _f.lastBlock.add(1);
+
     Data.Epoch storage epoch = _f.epochs[epochNumber];
+
+    if (blockNumber == epoch.startBlockNumber) {
+      epochNumber += 1;
+      _f.lastEpoch = uint64(epochNumber);
+      epoch = _f.epochs[epochNumber];
+    }
 
     require(epoch.isRequest == _isRequest);
     require(epoch.userActivated == _userActivated);
-
-    blockNumber = _f.lastBlock.add(1);
 
     Data.PlasmaBlock storage b = _f.blocks[blockNumber];
 

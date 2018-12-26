@@ -501,16 +501,16 @@ contract('RootChain', async ([
       // submits `NRELength` NRBs
       await submitDummyNRBs(NRELength);
 
-      await logEpochAndBlock(currentFork, forks[currentFork].lastEpoch);
       await logEpochAndBlock(currentFork, forks[currentFork].lastEpoch + 1);
+      await logEpochAndBlock(currentFork, forks[currentFork].lastEpoch + 2);
 
       // because no ERO, ORB epoch is empty
       const isRequest = false;
       const userActivated = false;
 
-      await checkEpoch(forks[currentFork].lastEpoch);
-      await checkEpoch(forks[currentFork].lastEpoch + 1);
       forks[currentFork].lastEpoch += 2;
+      await checkEpoch(forks[currentFork].lastEpoch - 1);
+      await checkEpoch(forks[currentFork].lastEpoch);
 
       await checkLastEpoch(isRequest, userActivated);
       await checkLastEpochNumber();
@@ -591,8 +591,8 @@ contract('RootChain', async ([
       const isRequest = true;
       const userActivated = false;
 
-      await checkEpoch(forks[currentFork].lastEpoch);
       forks[currentFork].lastEpoch += 1;
+      await checkEpoch(forks[currentFork].lastEpoch);
 
       await checkLastEpoch(isRequest, userActivated);
       await checkLastEpochNumber();
@@ -605,8 +605,8 @@ contract('RootChain', async ([
       const numORBs = epoch.endBlockNumber.sub(epoch.startBlockNumber).add(1);
       await submitDummyORBs(numORBs);
 
-      await checkEpoch(forks[currentFork].lastEpoch);
       forks[currentFork].lastEpoch += 1;
+      await checkEpoch(forks[currentFork].lastEpoch);
 
       await checkLastEpoch(isRequest, userActivated);
       await checkLastEpochNumber();
@@ -655,8 +655,8 @@ contract('RootChain', async ([
 
       await submitDummyNRBs(NRELength);
 
-      await checkEpoch(forks[currentFork].lastEpoch);
       forks[currentFork].lastEpoch += 1;
+      await checkEpoch(forks[currentFork].lastEpoch);
 
       await checkLastEpoch(isRequest, userActivated);
       await checkLastEpochNumber();
@@ -671,8 +671,8 @@ contract('RootChain', async ([
       const numORBs = epoch.endBlockNumber.sub(epoch.startBlockNumber).add(1);
       await submitDummyORBs(numORBs);
 
-      await checkEpoch(forks[currentFork].lastEpoch);
       forks[currentFork].lastEpoch += 1;
+      await checkEpoch(forks[currentFork].lastEpoch);
 
       await checkLastEpoch(isRequest, userActivated);
       await checkLastEpochNumber();
@@ -689,8 +689,8 @@ contract('RootChain', async ([
 
     before(async () => {
       log(`
-        Epoch#${forks[currentFork].lastEpoch - 1} ${await rootchain.getEpoch(currentFork, forks[currentFork].lastEpoch - 1)}
         Epoch#${forks[currentFork].lastEpoch} ${await rootchain.getEpoch(currentFork, forks[currentFork].lastEpoch)}
+        Epoch#${forks[currentFork].lastEpoch + 1} ${await rootchain.getEpoch(currentFork, forks[currentFork].lastEpoch + 1)}
         `);
     });
 
@@ -717,8 +717,8 @@ contract('RootChain', async ([
 
       await submitDummyNRBs(NRELength);
 
-      await checkEpoch(forks[currentFork].lastEpoch);
       forks[currentFork].lastEpoch += 1;
+      await checkEpoch(forks[currentFork].lastEpoch);
 
       await checkLastEpoch(isRequest, userActivated);
       await checkLastEpochNumber();
@@ -733,8 +733,8 @@ contract('RootChain', async ([
       const numORBs = epoch.endBlockNumber.sub(epoch.startBlockNumber).add(1);
       await submitDummyORBs(numORBs);
 
-      await checkEpoch(forks[currentFork].lastEpoch);
       forks[currentFork].lastEpoch += 1;
+      await checkEpoch(forks[currentFork].lastEpoch);
 
       await checkLastEpoch(isRequest, userActivated);
       await checkLastEpochNumber();
@@ -790,8 +790,8 @@ contract('RootChain', async ([
         }
 
         log(`
-          Epoch#${forks[currentFork].lastEpoch - 1} ${await rootchain.getEpoch(currentFork, forks[currentFork].lastEpoch - 1)}
           Epoch#${forks[currentFork].lastEpoch} ${await rootchain.getEpoch(currentFork, forks[currentFork].lastEpoch)}
+          Epoch#${forks[currentFork].lastEpoch + 1} ${await rootchain.getEpoch(currentFork, forks[currentFork].lastEpoch + 1)}
         `);
 
         // finalize all blocks
@@ -869,8 +869,8 @@ contract('RootChain', async ([
 
         await submitDummyURBs(1);
 
-        await checkEpoch(forks[currentFork].lastEpoch);
         forks[currentFork].lastEpoch += 1;
+        await checkEpoch(forks[currentFork].lastEpoch);
 
         // await checkLastEpoch(isRequest, userActivated);
         await checkLastEpochNumber();
@@ -884,8 +884,8 @@ contract('RootChain', async ([
           log(`Fork#${currentFork} ${JSON.stringify(new Data.Fork(await rootchain.forks(currentFork)))}`);
           await logEpochAndBlock(currentFork, nextFork.lastEpoch);
 
-          await checkEpoch(forks[currentFork].lastEpoch);
           forks[currentFork].lastEpoch += 1;
+          await checkEpoch(forks[currentFork].lastEpoch);
 
           // await checkLastEpoch(isRequest, userActivated);
           await checkLastEpochNumber();
@@ -904,8 +904,8 @@ contract('RootChain', async ([
           log(`Fork#${currentFork} ${JSON.stringify(new Data.Fork(await rootchain.forks(currentFork)))}`);
           await logEpochAndBlock(currentFork, nextFork.lastEpoch);
 
-          await checkEpoch(forks[currentFork].lastEpoch);
           forks[currentFork].lastEpoch += 1;
+          await checkEpoch(forks[currentFork].lastEpoch);
 
           // await checkLastEpoch(isRequest, userActivated);
           await checkLastEpochNumber();
