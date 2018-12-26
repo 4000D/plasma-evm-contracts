@@ -1,0 +1,916 @@
+
+> plasma-evm-contracts@1.0.0 test:verbose /Users/pjh/workspace/plasma-evm-contracts
+> VERBOSE=true scripts/test.sh ./test/RootChain.test.js
+
+Using existing ganache instance
+Truffle v4.1.14 (core: 4.1.14)
+Solidity v0.4.24 (solc-js)
+node_modules/.bin/truffle test ./test/RootChain.test.js
+Using network 'development'.
+
+Compiling ./contracts/EpochHandler.sol...
+Compiling ./contracts/RequestableContractI.sol...
+Compiling ./contracts/RootChain.sol...
+Compiling ./contracts/RootChainEvent.sol...
+Compiling ./contracts/RootChainStorage.sol...
+Compiling ./contracts/lib/Address.sol...
+Compiling ./contracts/lib/BMT.sol...
+Compiling ./contracts/lib/Data.sol...
+Compiling ./contracts/lib/Math.sol...
+Compiling ./contracts/lib/RLP.sol...
+Compiling ./contracts/lib/RLPEncode.sol...
+Compiling ./contracts/lib/SafeMath.sol...
+
+Compilation warnings encountered:
+
+/Users/pjh/workspace/plasma-evm-contracts/contracts/lib/Data.sol:2:1: Warning: Experimental features are turned on. Do not use experimental features on live deployments.
+pragma experimental ABIEncoderV2;
+^-------------------------------^
+,/Users/pjh/workspace/plasma-evm-contracts/contracts/RootChain.sol:681:60: Warning: This declaration shadows an existing declaration.
+  function lastBlock(uint forkNumber) public view returns (uint lastBlock) {
+                                                           ^------------^
+/Users/pjh/workspace/plasma-evm-contracts/contracts/RootChain.sol:681:3: The shadowed declaration is here:
+  function lastBlock(uint forkNumber) public view returns (uint lastBlock) {
+  ^ (Relevant source part starts here and spans across multiple lines).
+
+,/Users/pjh/workspace/plasma-evm-contracts/contracts/RootChain.sol:685:60: Warning: This declaration shadows an existing declaration.
+  function lastEpoch(uint forkNumber) public view returns (uint lastBlock) {
+                                                           ^------------^
+/Users/pjh/workspace/plasma-evm-contracts/contracts/RootChain.sol:681:3: The shadowed declaration is here:
+  function lastBlock(uint forkNumber) public view returns (uint lastBlock) {
+  ^ (Relevant source part starts here and spans across multiple lines).
+
+,/Users/pjh/workspace/plasma-evm-contracts/contracts/lib/Data.sol:606:17: Warning: Unused function parameter. Remove or comment out the variable name to silence this warning.
+  function init(RequestBlock storage self) internal {
+                ^-----------------------^
+,/Users/pjh/workspace/plasma-evm-contracts/contracts/lib/Data.sol:615:5: Warning: Unused function parameter. Remove or comment out the variable name to silence this warning.
+    RequestBlock storage self,
+    ^-----------------------^
+,/Users/pjh/workspace/plasma-evm-contracts/contracts/RootChain.sol:485:5: Warning: Unused function parameter. Remove or comment out the variable name to silence this warning.
+    bytes _key,
+    ^--------^
+,/Users/pjh/workspace/plasma-evm-contracts/contracts/RootChain.sol:486:5: Warning: Unused function parameter. Remove or comment out the variable name to silence this warning.
+    bytes _txByte, // RLP encoded transaction
+    ^-----------^
+,/Users/pjh/workspace/plasma-evm-contracts/contracts/RootChain.sol:487:5: Warning: Unused function parameter. Remove or comment out the variable name to silence this warning.
+    uint _branchMask,
+    ^--------------^
+,/Users/pjh/workspace/plasma-evm-contracts/contracts/RootChain.sol:488:5: Warning: Unused function parameter. Remove or comment out the variable name to silence this warning.
+    bytes32[] _siblings
+    ^-----------------^
+,/Users/pjh/workspace/plasma-evm-contracts/contracts/RootChain.sol:552:5: Warning: Unused local variable.
+    Data.Fork storage fork = forks[currentFork];
+    ^--------------------^
+,/Users/pjh/workspace/plasma-evm-contracts/contracts/RootChain.sol:690:5: Warning: Unused function parameter. Remove or comment out the variable name to silence this warning.
+    uint forkNumber,
+    ^-------------^
+,/Users/pjh/workspace/plasma-evm-contracts/contracts/RootChain.sol:825:5: Warning: Unused function parameter. Remove or comment out the variable name to silence this warning.
+    bool _userActivated
+    ^-----------------^
+,/Users/pjh/workspace/plasma-evm-contracts/contracts/EpochHandler.sol:308:3: Warning: Function state mutability can be restricted to view
+  function _getLatestRequestInfo()
+  ^ (Relevant source part starts here and spans across multiple lines).
+,/Users/pjh/workspace/plasma-evm-contracts/contracts/RootChain.sol:483:3: Warning: Function state mutability can be restricted to view
+  function challengeNullAddress(
+  ^ (Relevant source part starts here and spans across multiple lines).
+,/Users/pjh/workspace/plasma-evm-contracts/contracts/lib/Data.sol:242:3: Warning: Function state mutability can be restricted to view
+  function getLastEpochNumber(Fork storage _f, bool _isRequest) internal returns (uint) {
+  ^ (Relevant source part starts here and spans across multiple lines).
+,/Users/pjh/workspace/plasma-evm-contracts/contracts/lib/Data.sol:606:3: Warning: Function state mutability can be restricted to pure
+  function init(RequestBlock storage self) internal {
+  ^ (Relevant source part starts here and spans across multiple lines).
+,/Users/pjh/workspace/plasma-evm-contracts/contracts/lib/Data.sol:759:3: Warning: Function state mutability can be restricted to view
+  function _checkTxRoot(
+  ^ (Relevant source part starts here and spans across multiple lines).
+
+
+  Contract: RootChain
+
+      EpochHandler contract at 0x35179ef42ed40f7f50e0943e8ad1de8b6ab31a89
+      RootChain contract at 0x7fb71d4672f75049a5400643e46d39f761a1098d
+      
+    1: Fork#0 Epoch#1 (testEpochsWithoutRequest)
+
+      [testEpochsWithoutRequest]
+      NRBEPochNumber: 1
+      forks[currentFork].lastEpoch: 1
+      rootchain.forks: {"forkedBlock":"0","firstEpoch":"0","lastEpoch":"1","firstBlock":"0","lastBlock":"0","lastFinalizedBlock":"0","timestamp":"0","firstEnterEpoch":"0","lastEnterEpoch":"0","nextBlockToRebase":"0","rebased":false}
+      rootchain.lastEpoch: {"requestStart":"0","requestEnd":"0","startBlockNumber":"1","endBlockNumber":"2","firstRequestBlockId":"0","numEnter":"0","nextEnterEpoch":"0","isEmpty":false,"initialized":true,"isRequest":false,"userActivated":false,"rebase":false}
+      
+
+      Epoch#0.1 {"requestStart":"0","requestEnd":"0","startBlockNumber":"1","endBlockNumber":"2","firstRequestBlockId":"0","numEnter":"0","nextEnterEpoch":"0","isEmpty":false,"initialized":true,"isRequest":false,"userActivated":false,"rebase":false}
+      ORBs.length: 0
+      
+
+        Block#1 {"epochNumber":"0","requestBlockId":"0","referenceBlock":"0","timestamp":"0","statesRoot":"0x0000000000000000000000000000000000000000000000000000000000000000","transactionsRoot":"0x0000000000000000000000000000000000000000000000000000000000000000","receiptsRoot":"0x0000000000000000000000000000000000000000000000000000000000000000","isRequest":false,"userActivated":false,"challenged":false,"challenging":false,"finalized":false}
+
+        Block#2 {"epochNumber":"0","requestBlockId":"0","referenceBlock":"0","timestamp":"0","statesRoot":"0x0000000000000000000000000000000000000000000000000000000000000000","transactionsRoot":"0x0000000000000000000000000000000000000000000000000000000000000000","receiptsRoot":"0x0000000000000000000000000000000000000000000000000000000000000000","isRequest":false,"userActivated":false,"challenged":false,"challenging":false,"finalized":false}
+
+    checking Epoch#0#1
+[BlockSubmitted]: {"fork":"0","epochNumber":"1","blockNumber":"1","isRequest":false,"userActivated":false}
+
+      Epoch#0.2 {"requestStart":"0","requestEnd":"0","startBlockNumber":"2","endBlockNumber":"2","firstRequestBlockId":"0","numEnter":"0","nextEnterEpoch":"0","isEmpty":true,"initialized":true,"isRequest":true,"userActivated":false,"rebase":false}
+      ORBs.length: 0
+      
+
+        Block#2 {"epochNumber":"1","requestBlockId":"0","referenceBlock":"0","timestamp":"1545848906","statesRoot":"0x0ded2f89db1e11454ba4ba90e31850587943ed4a412f2ddf422bd948eae8b164","transactionsRoot":"0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421","receiptsRoot":"0x000000000000000000000000000000000000000000000000000000000000dead","isRequest":false,"userActivated":false,"challenged":false,"challenging":false,"finalized":false}
+
+      Epoch#0.3 {"requestStart":"0","requestEnd":"0","startBlockNumber":"3","endBlockNumber":"4","firstRequestBlockId":"0","numEnter":"0","nextEnterEpoch":"0","isEmpty":false,"initialized":true,"isRequest":false,"userActivated":false,"rebase":false}
+      ORBs.length: 0
+      
+
+        Block#3 {"epochNumber":"0","requestBlockId":"0","referenceBlock":"0","timestamp":"0","statesRoot":"0x0000000000000000000000000000000000000000000000000000000000000000","transactionsRoot":"0x0000000000000000000000000000000000000000000000000000000000000000","receiptsRoot":"0x0000000000000000000000000000000000000000000000000000000000000000","isRequest":false,"userActivated":false,"challenged":false,"challenging":false,"finalized":false}
+
+        Block#4 {"epochNumber":"0","requestBlockId":"0","referenceBlock":"0","timestamp":"0","statesRoot":"0x0000000000000000000000000000000000000000000000000000000000000000","transactionsRoot":"0x0000000000000000000000000000000000000000000000000000000000000000","receiptsRoot":"0x0000000000000000000000000000000000000000000000000000000000000000","isRequest":false,"userActivated":false,"challenged":false,"challenging":false,"finalized":false}
+[EpochPrepared]: {"forkNumber":"0","epochNumber":"2","startBlockNumber":"2","endBlockNumber":"2","requestStart":"0","requestEnd":"0","epochIsEmpty":true,"isRequest":true,"userActivated":false,"rebase":false}
+[EpochPrepared]: {"forkNumber":"0","epochNumber":"3","startBlockNumber":"3","endBlockNumber":"4","requestStart":"0","requestEnd":"0","epochIsEmpty":false,"isRequest":false,"userActivated":false,"rebase":false}
+[BlockSubmitted]: {"fork":"0","epochNumber":"1","blockNumber":"2","isRequest":false,"userActivated":false}
+
+    checking Epoch#0#2
+epoch1: {"requestStart":"0","requestEnd":"0","startBlockNumber":"2","endBlockNumber":"2","firstRequestBlockId":"0","numEnter":"0","nextEnterEpoch":"0","isEmpty":true,"initialized":true,"isRequest":true,"userActivated":false,"rebase":false}
+
+    checking Epoch#0#3
+      ✓ next empty ORE#2 should be prepared (432905 gas)
+
+      lastBlock: 2
+      lastFinalizedBlock: 0
+    
+
+      lastBlock: 2
+      lastFinalizedBlock: 1
+    
+      ✓ can finalize blocks (107864 gas)
+    2: Fork#0 Epoch#3 (testEpochsWithInvalidExitRequest)
+[BlockFinalized]: {"forkNumber":"0","blockNumber":"1"}
+[BlockFinalized]: {"forkNumber":"0","blockNumber":"2"}
+
+        Epoch#2 0,0,2,2,0,0,0,true,true,true,false,false
+        Epoch#3 0,0,3,4,0,0,0,false,true,false,false,false
+        
+      ✓ NRE#3: user can make an invalid exit request for token withdrawal (3234335 gas)
+
+    checking Epoch#0#3
+
+    checking Epoch#0#4
+epoch1: {"requestStart":"0","requestEnd":"3","startBlockNumber":"5","endBlockNumber":"5","firstRequestBlockId":"0","numEnter":"0","nextEnterEpoch":"0","isEmpty":false,"initialized":true,"isRequest":true,"userActivated":false,"rebase":false}
+[EpochPrepared]: {"forkNumber":"0","epochNumber":"4","startBlockNumber":"5","endBlockNumber":"5","requestStart":"0","requestEnd":"3","epochIsEmpty":false,"isRequest":true,"userActivated":false,"rebase":false}
+[BlockSubmitted]: {"fork":"0","epochNumber":"3","blockNumber":"3","isRequest":false,"userActivated":false}
+[BlockSubmitted]: {"fork":"0","epochNumber":"3","blockNumber":"4","isRequest":false,"userActivated":false}
+
+        Epoch?
+         - last: 4
+         - previous requeast epoch: 2
+        
+
+      1) NRE#3: operator submits NRBs
+
+    Events emitted during test:
+    ---------------------------
+
+    BlockSubmitted(fork: 0, epochNumber: 3, blockNumber: 3, isRequest: false, userActivated: false)
+    BlockSubmitted(fork: 0, epochNumber: 3, blockNumber: 4, isRequest: false, userActivated: false)
+    EpochPrepared(forkNumber: 0, epochNumber: 4, startBlockNumber: 5, endBlockNumber: 5, requestStart: 0, requestEnd: 3, epochIsEmpty: false, isRequest: true, userActivated: false, rebase: false)
+
+    ---------------------------
+
+    checking Epoch#0#4
+epoch1: {"requestStart":"0","requestEnd":"3","startBlockNumber":"5","endBlockNumber":"5","firstRequestBlockId":"0","numEnter":"0","nextEnterEpoch":"0","isEmpty":false,"initialized":true,"isRequest":true,"userActivated":false,"rebase":false}
+
+        Epoch?
+         - last: 4
+         - previous requeast epoch: 2
+        
+
+      2) ORE#4: operator submits ORBs
+
+    Events emitted during test:
+    ---------------------------
+
+    BlockSubmitted(fork: 0, epochNumber: 4, blockNumber: 5, isRequest: true, userActivated: false)
+    EpochPrepared(forkNumber: 0, epochNumber: 5, startBlockNumber: 6, endBlockNumber: 7, requestStart: 0, requestEnd: 0, epochIsEmpty: false, isRequest: false, userActivated: false, rebase: false)
+
+    ---------------------------
+
+      lastBlock: 5
+      lastFinalizedBlock: 2
+    
+[EpochPrepared]: {"forkNumber":"0","epochNumber":"5","startBlockNumber":"6","endBlockNumber":"7","requestStart":"0","requestEnd":"0","epochIsEmpty":false,"isRequest":false,"userActivated":false,"rebase":false}
+[BlockSubmitted]: {"fork":"0","epochNumber":"4","blockNumber":"5","isRequest":true,"userActivated":false}
+[EpochFinalized]: {"forkNumber":"0","epochNumber":"3","startBlockNumber":"3","endBlockNumber":"4"}
+
+      lastBlock: 5
+      lastFinalizedBlock: 4
+    
+      ✓ can finalize blocks (116906 gas)
+[BlockFinalized]: {"forkNumber":"0","blockNumber":"5"}
+
+      Epoch#0.4 {"requestStart":"0","requestEnd":"3","startBlockNumber":"5","endBlockNumber":"5","firstRequestBlockId":"0","numEnter":"0","nextEnterEpoch":"0","isEmpty":false,"initialized":true,"isRequest":true,"userActivated":false,"rebase":false}
+      ORBs.length: 1
+      
+
+        Block#5 {"epochNumber":"4","requestBlockId":"0","referenceBlock":"0","timestamp":"1545848923","statesRoot":"0x0ded2f89db1e11454ba4ba90e31850587943ed4a412f2ddf422bd948eae8b164","transactionsRoot":"0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421","receiptsRoot":"0x000000000000000000000000000000000000000000000000000000000000dead","isRequest":true,"userActivated":false,"challenged":false,"challenging":false,"finalized":true}
+[RequestChallenged]: {"requestId":"0","userActivated":false}
+[RequestChallenged]: {"requestId":"1","userActivated":false}
+[RequestChallenged]: {"requestId":"2","userActivated":false}
+      ✓ can challenge on invalid exit (189928 gas)
+[RequestChallenged]: {"requestId":"3","userActivated":false}
+      ✓ should finalize invalid requests
+    3: Fork#0 Epoch#5 (testEpochsWithoutRequest)
+
+      [testEpochsWithoutRequest]
+      NRBEPochNumber: 5
+      forks[currentFork].lastEpoch: 5
+      rootchain.forks: {"forkedBlock":"0","firstEpoch":"0","lastEpoch":"5","firstBlock":"0","lastBlock":"5","lastFinalizedBlock":"5","timestamp":"0","firstEnterEpoch":"0","lastEnterEpoch":"0","nextBlockToRebase":"0","rebased":false}
+      rootchain.lastEpoch: {"requestStart":"0","requestEnd":"0","startBlockNumber":"6","endBlockNumber":"7","firstRequestBlockId":"0","numEnter":"0","nextEnterEpoch":"0","isEmpty":false,"initialized":true,"isRequest":false,"userActivated":false,"rebase":false}
+      
+
+      requestIdToApply:0
+      e.args.requestId.toNumber():0
+      
+
+      Epoch#0.5 {"requestStart":"0","requestEnd":"0","startBlockNumber":"6","endBlockNumber":"7","firstRequestBlockId":"0","numEnter":"0","nextEnterEpoch":"0","isEmpty":false,"initialized":true,"isRequest":false,"userActivated":false,"rebase":false}
+      ORBs.length: 1
+      
+[RequestFinalized]: {"requestId":"0","userActivated":false}
+
+        Block#6 {"epochNumber":"0","requestBlockId":"0","referenceBlock":"0","timestamp":"0","statesRoot":"0x0000000000000000000000000000000000000000000000000000000000000000","transactionsRoot":"0x0000000000000000000000000000000000000000000000000000000000000000","receiptsRoot":"0x0000000000000000000000000000000000000000000000000000000000000000","isRequest":false,"userActivated":false,"challenged":false,"challenging":false,"finalized":false}
+
+        Block#7 {"epochNumber":"0","requestBlockId":"0","referenceBlock":"0","timestamp":"0","statesRoot":"0x0000000000000000000000000000000000000000000000000000000000000000","transactionsRoot":"0x0000000000000000000000000000000000000000000000000000000000000000","receiptsRoot":"0x0000000000000000000000000000000000000000000000000000000000000000","isRequest":false,"userActivated":false,"challenged":false,"challenging":false,"finalized":false}
+
+    checking Epoch#0#5
+[RequestFinalized]: {"requestId":"1","userActivated":false}
+
+      requestIdToApply:1
+      e.args.requestId.toNumber():1
+      
+[EpochPrepared]: {"forkNumber":"0","epochNumber":"6","startBlockNumber":"7","endBlockNumber":"7","requestStart":"3","requestEnd":"3","epochIsEmpty":true,"isRequest":true,"userActivated":false,"rebase":false}
+[EpochPrepared]: {"forkNumber":"0","epochNumber":"7","startBlockNumber":"8","endBlockNumber":"9","requestStart":"0","requestEnd":"0","epochIsEmpty":false,"isRequest":false,"userActivated":false,"rebase":false}
+[BlockSubmitted]: {"fork":"0","epochNumber":"5","blockNumber":"6","isRequest":false,"userActivated":false}
+[BlockSubmitted]: {"fork":"0","epochNumber":"5","blockNumber":"7","isRequest":false,"userActivated":false}
+
+      requestIdToApply:2
+      e.args.requestId.toNumber():2
+      
+
+      Epoch#0.6 {"requestStart":"3","requestEnd":"3","startBlockNumber":"7","endBlockNumber":"7","firstRequestBlockId":"0","numEnter":"0","nextEnterEpoch":"0","isEmpty":true,"initialized":true,"isRequest":true,"userActivated":false,"rebase":false}
+      ORBs.length: 1
+      
+[RequestFinalized]: {"requestId":"2","userActivated":false}
+
+        Block#7 {"epochNumber":"5","requestBlockId":"0","referenceBlock":"0","timestamp":"1545848936","statesRoot":"0x0ded2f89db1e11454ba4ba90e31850587943ed4a412f2ddf422bd948eae8b164","transactionsRoot":"0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421","receiptsRoot":"0x000000000000000000000000000000000000000000000000000000000000dead","isRequest":false,"userActivated":false,"challenged":false,"challenging":false,"finalized":false}
+
+      Epoch#0.7 {"requestStart":"0","requestEnd":"0","startBlockNumber":"8","endBlockNumber":"9","firstRequestBlockId":"0","numEnter":"0","nextEnterEpoch":"0","isEmpty":false,"initialized":true,"isRequest":false,"userActivated":false,"rebase":false}
+      ORBs.length: 1
+      
+
+        Block#8 {"epochNumber":"0","requestBlockId":"0","referenceBlock":"0","timestamp":"0","statesRoot":"0x0000000000000000000000000000000000000000000000000000000000000000","transactionsRoot":"0x0000000000000000000000000000000000000000000000000000000000000000","receiptsRoot":"0x0000000000000000000000000000000000000000000000000000000000000000","isRequest":false,"userActivated":false,"challenged":false,"challenging":false,"finalized":false}
+
+        Block#9 {"epochNumber":"0","requestBlockId":"0","referenceBlock":"0","timestamp":"0","statesRoot":"0x0000000000000000000000000000000000000000000000000000000000000000","transactionsRoot":"0x0000000000000000000000000000000000000000000000000000000000000000","receiptsRoot":"0x0000000000000000000000000000000000000000000000000000000000000000","isRequest":false,"userActivated":false,"challenged":false,"challenging":false,"finalized":false}
+
+      requestIdToApply:3
+      e.args.requestId.toNumber():3
+      
+
+    checking Epoch#0#6
+epoch1: {"requestStart":"3","requestEnd":"3","startBlockNumber":"7","endBlockNumber":"7","firstRequestBlockId":"0","numEnter":"0","nextEnterEpoch":"0","isEmpty":true,"initialized":true,"isRequest":true,"userActivated":false,"rebase":false}
+[RequestFinalized]: {"requestId":"3","userActivated":false}
+
+        Epoch?
+         - last: 6
+         - previous requeast epoch: 4
+        
+
+    checking Epoch#0#7
+      ✓ next empty ORE#6 should be prepared (548287 gas)
+
+      lastBlock: 7
+      lastFinalizedBlock: 5
+    
+
+      lastBlock: 7
+      lastFinalizedBlock: 6
+    
+      ✓ can finalize blocks (107864 gas)
+    4: Fork#0 Epoch#7 (testEpochsWithRequest)
+[BlockFinalized]: {"forkNumber":"0","blockNumber":"6"}
+[BlockFinalized]: {"forkNumber":"0","blockNumber":"7"}
+
+    checking Epoch#0#7
+      ✓ NRE#7: user can make an enter request for ether deposit (1554372 gas)
+      ✓ NRE#7: user can make an enter request for token deposit (3282588 gas)
+[EpochPrepared]: {"forkNumber":"0","epochNumber":"8","startBlockNumber":"10","endBlockNumber":"10","requestStart":"4","requestEnd":"11","epochIsEmpty":false,"isRequest":true,"userActivated":false,"rebase":false}
+[BlockSubmitted]: {"fork":"0","epochNumber":"7","blockNumber":"8","isRequest":false,"userActivated":false}
+[BlockSubmitted]: {"fork":"0","epochNumber":"7","blockNumber":"9","isRequest":false,"userActivated":false}
+
+      Epoch#0.7 {"requestStart":"0","requestEnd":"0","startBlockNumber":"8","endBlockNumber":"9","firstRequestBlockId":"0","numEnter":"0","nextEnterEpoch":"0","isEmpty":false,"initialized":true,"isRequest":false,"userActivated":false,"rebase":false}
+      ORBs.length: 2
+      
+
+        Block#8 {"epochNumber":"7","requestBlockId":"0","referenceBlock":"0","timestamp":"1545848960","statesRoot":"0x0ded2f89db1e11454ba4ba90e31850587943ed4a412f2ddf422bd948eae8b164","transactionsRoot":"0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421","receiptsRoot":"0x000000000000000000000000000000000000000000000000000000000000dead","isRequest":false,"userActivated":false,"challenged":false,"challenging":false,"finalized":false}
+
+        Block#9 {"epochNumber":"7","requestBlockId":"0","referenceBlock":"0","timestamp":"1545848960","statesRoot":"0x0ded2f89db1e11454ba4ba90e31850587943ed4a412f2ddf422bd948eae8b164","transactionsRoot":"0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421","receiptsRoot":"0x000000000000000000000000000000000000000000000000000000000000dead","isRequest":false,"userActivated":false,"challenged":false,"challenging":false,"finalized":false}
+
+    checking Epoch#0#8
+epoch1: {"requestStart":"4","requestEnd":"11","startBlockNumber":"10","endBlockNumber":"10","firstRequestBlockId":"0","numEnter":"8","nextEnterEpoch":"0","isEmpty":false,"initialized":true,"isRequest":true,"userActivated":false,"rebase":false}
+
+        Epoch?
+         - last: 8
+         - previous requeast epoch: 6
+        
+
+      3) NRE#7: operator submits NRBs
+
+    Events emitted during test:
+    ---------------------------
+
+    BlockSubmitted(fork: 0, epochNumber: 7, blockNumber: 8, isRequest: false, userActivated: false)
+    BlockSubmitted(fork: 0, epochNumber: 7, blockNumber: 9, isRequest: false, userActivated: false)
+    EpochPrepared(forkNumber: 0, epochNumber: 8, startBlockNumber: 10, endBlockNumber: 10, requestStart: 4, requestEnd: 11, epochIsEmpty: false, isRequest: true, userActivated: false, rebase: false)
+
+    ---------------------------
+
+      Epoch#0.8 {"requestStart":"4","requestEnd":"11","startBlockNumber":"10","endBlockNumber":"10","firstRequestBlockId":"0","numEnter":"8","nextEnterEpoch":"0","isEmpty":false,"initialized":true,"isRequest":true,"userActivated":false,"rebase":false}
+      ORBs.length: 2
+      
+
+        Block#10 {"epochNumber":"0","requestBlockId":"0","referenceBlock":"0","timestamp":"0","statesRoot":"0x0000000000000000000000000000000000000000000000000000000000000000","transactionsRoot":"0x0000000000000000000000000000000000000000000000000000000000000000","receiptsRoot":"0x0000000000000000000000000000000000000000000000000000000000000000","isRequest":true,"userActivated":false,"challenged":false,"challenging":false,"finalized":false}
+
+    checking Epoch#0#8
+epoch1: {"requestStart":"4","requestEnd":"11","startBlockNumber":"10","endBlockNumber":"10","firstRequestBlockId":"0","numEnter":"9","nextEnterEpoch":"0","isEmpty":false,"initialized":true,"isRequest":true,"userActivated":false,"rebase":false}
+[EpochPrepared]: {"forkNumber":"0","epochNumber":"9","startBlockNumber":"11","endBlockNumber":"12","requestStart":"0","requestEnd":"0","epochIsEmpty":false,"isRequest":false,"userActivated":false,"rebase":false}
+[BlockSubmitted]: {"fork":"0","epochNumber":"8","blockNumber":"10","isRequest":true,"userActivated":false}
+
+        Epoch?
+         - last: 8
+         - previous requeast epoch: 6
+        
+
+      4) ORE#8: operator submits ORBs
+
+    Events emitted during test:
+    ---------------------------
+
+    BlockSubmitted(fork: 0, epochNumber: 8, blockNumber: 10, isRequest: true, userActivated: false)
+    EpochPrepared(forkNumber: 0, epochNumber: 9, startBlockNumber: 11, endBlockNumber: 12, requestStart: 0, requestEnd: 0, epochIsEmpty: false, isRequest: false, userActivated: false, rebase: false)
+
+    ---------------------------
+
+      lastBlock: 10
+      lastFinalizedBlock: 7
+    
+
+      lastBlock: 10
+      lastFinalizedBlock: 9
+    
+[BlockFinalized]: {"forkNumber":"0","blockNumber":"10"}
+[EpochFinalized]: {"forkNumber":"0","epochNumber":"7","startBlockNumber":"8","endBlockNumber":"9"}
+      ✓ can finalize blocks (116906 gas)
+
+      requestIdToApply:4
+      e.args.requestId.toNumber():4
+      
+[RequestFinalized]: {"requestId":"4","userActivated":false}
+
+      requestIdToApply:5
+      e.args.requestId.toNumber():5
+      
+[RequestFinalized]: {"requestId":"5","userActivated":false}
+
+      requestIdToApply:6
+      e.args.requestId.toNumber():6
+      
+[RequestFinalized]: {"requestId":"6","userActivated":false}
+
+      requestIdToApply:7
+      e.args.requestId.toNumber():7
+      
+[RequestFinalized]: {"requestId":"7","userActivated":false}
+
+      requestIdToApply:8
+      e.args.requestId.toNumber():8
+      
+[RequestFinalized]: {"requestId":"8","userActivated":false}
+
+      requestIdToApply:9
+      e.args.requestId.toNumber():9
+      
+[RequestFinalized]: {"requestId":"9","userActivated":false}
+
+      requestIdToApply:10
+      e.args.requestId.toNumber():10
+      
+[RequestFinalized]: {"requestId":"10","userActivated":false}
+
+      requestIdToApply:11
+      e.args.requestId.toNumber():11
+      
+      ✓ should finalize requests (355184 gas)
+    5: Fork#0 Epoch#9 (testEpochsWithExitRequest)
+[RequestFinalized]: {"requestId":"11","userActivated":false}
+
+        Epoch#8 4,11,10,10,0,9,0,false,true,true,false,false
+        Epoch#9 0,0,11,12,0,0,0,false,true,false,false,false
+        
+      ✓ NRE#9: user can make an exit request for token withdrawal (3224072 gas)
+[EpochPrepared]: {"forkNumber":"0","epochNumber":"10","startBlockNumber":"13","endBlockNumber":"13","requestStart":"12","requestEnd":"15","epochIsEmpty":false,"isRequest":true,"userActivated":false,"rebase":false}
+[BlockSubmitted]: {"fork":"0","epochNumber":"9","blockNumber":"11","isRequest":false,"userActivated":false}
+[BlockSubmitted]: {"fork":"0","epochNumber":"9","blockNumber":"12","isRequest":false,"userActivated":false}
+
+    checking Epoch#0#9
+
+    checking Epoch#0#10
+epoch1: {"requestStart":"12","requestEnd":"15","startBlockNumber":"13","endBlockNumber":"13","firstRequestBlockId":"1","numEnter":"0","nextEnterEpoch":"0","isEmpty":false,"initialized":true,"isRequest":true,"userActivated":false,"rebase":false}
+
+        Epoch?
+         - last: 10
+         - previous requeast epoch: 8
+        
+      ✓ NRE#9: operator submits NRBs (406750 gas)
+
+    checking Epoch#0#10
+epoch1: {"requestStart":"12","requestEnd":"15","startBlockNumber":"13","endBlockNumber":"13","firstRequestBlockId":"1","numEnter":"7","nextEnterEpoch":"0","isEmpty":false,"initialized":true,"isRequest":true,"userActivated":false,"rebase":false}
+
+        Epoch?
+         - last: 10
+         - previous requeast epoch: 8
+        
+
+    checking Epoch#0#11
+      ✓ ORE#10: operator submits ORBs (194399 gas)
+[EpochPrepared]: {"forkNumber":"0","epochNumber":"11","startBlockNumber":"14","endBlockNumber":"15","requestStart":"0","requestEnd":"0","epochIsEmpty":false,"isRequest":false,"userActivated":false,"rebase":false}
+[BlockSubmitted]: {"fork":"0","epochNumber":"10","blockNumber":"13","isRequest":true,"userActivated":false}
+
+      lastBlock: 13
+      lastFinalizedBlock: 10
+    
+
+      lastBlock: 13
+      lastFinalizedBlock: 12
+    
+[BlockFinalized]: {"forkNumber":"0","blockNumber":"13"}
+[EpochFinalized]: {"forkNumber":"0","epochNumber":"9","startBlockNumber":"11","endBlockNumber":"12"}
+      ✓ can finalize blocks (116906 gas)
+[RequestFinalized]: {"requestId":"12","userActivated":false}
+
+      requestIdToApply:12
+      e.args.requestId.toNumber():12
+      
+[RequestFinalized]: {"requestId":"13","userActivated":false}
+
+      requestIdToApply:13
+      e.args.requestId.toNumber():13
+      
+
+      requestIdToApply:14
+      e.args.requestId.toNumber():14
+      
+[RequestFinalized]: {"requestId":"14","userActivated":false}
+[RequestFinalized]: {"requestId":"15","userActivated":false}
+
+      requestIdToApply:15
+      e.args.requestId.toNumber():15
+      
+      ✓ should finalize requests (262964 gas)
+    6: Fork#0 Epoch#11 (testEpochsWithRequest)
+
+    checking Epoch#0#11
+      ✓ NRE#11: user can make an enter request for ether deposit (1554372 gas)
+      ✓ NRE#11: user can make an enter request for token deposit (3282588 gas)
+[EpochPrepared]: {"forkNumber":"0","epochNumber":"12","startBlockNumber":"16","endBlockNumber":"16","requestStart":"16","requestEnd":"23","epochIsEmpty":false,"isRequest":true,"userActivated":false,"rebase":false}
+[BlockSubmitted]: {"fork":"0","epochNumber":"11","blockNumber":"14","isRequest":false,"userActivated":false}
+[BlockSubmitted]: {"fork":"0","epochNumber":"11","blockNumber":"15","isRequest":false,"userActivated":false}
+
+      Epoch#0.11 {"requestStart":"0","requestEnd":"0","startBlockNumber":"14","endBlockNumber":"15","firstRequestBlockId":"0","numEnter":"0","nextEnterEpoch":"0","isEmpty":false,"initialized":true,"isRequest":false,"userActivated":false,"rebase":false}
+      ORBs.length: 4
+      
+
+        Block#14 {"epochNumber":"11","requestBlockId":"0","referenceBlock":"0","timestamp":"1545849014","statesRoot":"0x0ded2f89db1e11454ba4ba90e31850587943ed4a412f2ddf422bd948eae8b164","transactionsRoot":"0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421","receiptsRoot":"0x000000000000000000000000000000000000000000000000000000000000dead","isRequest":false,"userActivated":false,"challenged":false,"challenging":false,"finalized":false}
+
+        Block#15 {"epochNumber":"11","requestBlockId":"0","referenceBlock":"0","timestamp":"1545849014","statesRoot":"0x0ded2f89db1e11454ba4ba90e31850587943ed4a412f2ddf422bd948eae8b164","transactionsRoot":"0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421","receiptsRoot":"0x000000000000000000000000000000000000000000000000000000000000dead","isRequest":false,"userActivated":false,"challenged":false,"challenging":false,"finalized":false}
+
+    checking Epoch#0#12
+epoch1: {"requestStart":"16","requestEnd":"23","startBlockNumber":"16","endBlockNumber":"16","firstRequestBlockId":"2","numEnter":"8","nextEnterEpoch":"0","isEmpty":false,"initialized":true,"isRequest":true,"userActivated":false,"rebase":false}
+
+        Epoch?
+         - last: 12
+         - previous requeast epoch: 10
+        
+      ✓ NRE#11: operator submits NRBs (403648 gas)
+
+      Epoch#0.12 {"requestStart":"16","requestEnd":"23","startBlockNumber":"16","endBlockNumber":"16","firstRequestBlockId":"2","numEnter":"8","nextEnterEpoch":"0","isEmpty":false,"initialized":true,"isRequest":true,"userActivated":false,"rebase":false}
+      ORBs.length: 4
+      
+
+        Block#16 {"epochNumber":"0","requestBlockId":"2","referenceBlock":"0","timestamp":"0","statesRoot":"0x0000000000000000000000000000000000000000000000000000000000000000","transactionsRoot":"0x0000000000000000000000000000000000000000000000000000000000000000","receiptsRoot":"0x0000000000000000000000000000000000000000000000000000000000000000","isRequest":true,"userActivated":false,"challenged":false,"challenging":false,"finalized":false}
+
+    checking Epoch#0#12
+epoch1: {"requestStart":"16","requestEnd":"23","startBlockNumber":"16","endBlockNumber":"16","firstRequestBlockId":"2","numEnter":"9","nextEnterEpoch":"0","isEmpty":false,"initialized":true,"isRequest":true,"userActivated":false,"rebase":false}
+[EpochPrepared]: {"forkNumber":"0","epochNumber":"13","startBlockNumber":"17","endBlockNumber":"18","requestStart":"0","requestEnd":"0","epochIsEmpty":false,"isRequest":false,"userActivated":false,"rebase":false}
+[BlockSubmitted]: {"fork":"0","epochNumber":"12","blockNumber":"16","isRequest":true,"userActivated":false}
+
+        Epoch?
+         - last: 12
+         - previous requeast epoch: 10
+        
+
+    checking Epoch#0#13
+      ✓ ORE#12: operator submits ORBs (194399 gas)
+
+      lastBlock: 16
+      lastFinalizedBlock: 13
+    
+[EpochFinalized]: {"forkNumber":"0","epochNumber":"11","startBlockNumber":"14","endBlockNumber":"15"}
+
+      lastBlock: 16
+      lastFinalizedBlock: 15
+    
+      ✓ can finalize blocks (116906 gas)
+[BlockFinalized]: {"forkNumber":"0","blockNumber":"16"}
+
+      requestIdToApply:16
+      e.args.requestId.toNumber():16
+      
+[RequestFinalized]: {"requestId":"16","userActivated":false}
+
+      requestIdToApply:17
+      e.args.requestId.toNumber():17
+      
+[RequestFinalized]: {"requestId":"17","userActivated":false}
+
+      requestIdToApply:18
+      e.args.requestId.toNumber():18
+      
+[RequestFinalized]: {"requestId":"18","userActivated":false}
+
+      requestIdToApply:19
+      e.args.requestId.toNumber():19
+      
+[RequestFinalized]: {"requestId":"19","userActivated":false}
+
+      requestIdToApply:20
+      e.args.requestId.toNumber():20
+      
+[RequestFinalized]: {"requestId":"20","userActivated":false}
+
+      requestIdToApply:21
+      e.args.requestId.toNumber():21
+      
+[RequestFinalized]: {"requestId":"21","userActivated":false}
+
+      requestIdToApply:22
+      e.args.requestId.toNumber():22
+      
+[RequestFinalized]: {"requestId":"22","userActivated":false}
+
+      requestIdToApply:23
+      e.args.requestId.toNumber():23
+      
+      ✓ should finalize requests (355184 gas)
+    7: Fork#0 Epoch#13 (testEpochsWithExitRequest)
+[RequestFinalized]: {"requestId":"23","userActivated":false}
+
+        Epoch#12 16,23,16,16,2,9,0,false,true,true,false,false
+        Epoch#13 0,0,17,18,0,0,0,false,true,false,false,false
+        
+      ✓ NRE#13: user can make an exit request for token withdrawal (3224072 gas)
+
+    checking Epoch#0#13
+
+    checking Epoch#0#14
+epoch1: {"requestStart":"24","requestEnd":"27","startBlockNumber":"19","endBlockNumber":"19","firstRequestBlockId":"3","numEnter":"0","nextEnterEpoch":"0","isEmpty":false,"initialized":true,"isRequest":true,"userActivated":false,"rebase":false}
+[EpochPrepared]: {"forkNumber":"0","epochNumber":"14","startBlockNumber":"19","endBlockNumber":"19","requestStart":"24","requestEnd":"27","epochIsEmpty":false,"isRequest":true,"userActivated":false,"rebase":false}
+[BlockSubmitted]: {"fork":"0","epochNumber":"13","blockNumber":"17","isRequest":false,"userActivated":false}
+[BlockSubmitted]: {"fork":"0","epochNumber":"13","blockNumber":"18","isRequest":false,"userActivated":false}
+
+        Epoch?
+         - last: 14
+         - previous requeast epoch: 12
+        
+      ✓ NRE#13: operator submits NRBs (406750 gas)
+
+    checking Epoch#0#14
+epoch1: {"requestStart":"24","requestEnd":"27","startBlockNumber":"19","endBlockNumber":"19","firstRequestBlockId":"3","numEnter":"7","nextEnterEpoch":"0","isEmpty":false,"initialized":true,"isRequest":true,"userActivated":false,"rebase":false}
+
+        Epoch?
+         - last: 14
+         - previous requeast epoch: 12
+        
+
+    checking Epoch#0#15
+      ✓ ORE#14: operator submits ORBs (194399 gas)
+[EpochPrepared]: {"forkNumber":"0","epochNumber":"15","startBlockNumber":"20","endBlockNumber":"21","requestStart":"0","requestEnd":"0","epochIsEmpty":false,"isRequest":false,"userActivated":false,"rebase":false}
+[BlockSubmitted]: {"fork":"0","epochNumber":"14","blockNumber":"19","isRequest":true,"userActivated":false}
+
+      lastBlock: 19
+      lastFinalizedBlock: 16
+    
+
+      lastBlock: 19
+      lastFinalizedBlock: 18
+    
+      ✓ can finalize blocks (116906 gas)
+[BlockFinalized]: {"forkNumber":"0","blockNumber":"19"}
+[EpochFinalized]: {"forkNumber":"0","epochNumber":"13","startBlockNumber":"17","endBlockNumber":"18"}
+
+      requestIdToApply:24
+      e.args.requestId.toNumber():24
+      
+[RequestFinalized]: {"requestId":"24","userActivated":false}
+
+      requestIdToApply:25
+      e.args.requestId.toNumber():25
+      
+[RequestFinalized]: {"requestId":"25","userActivated":false}
+[RequestFinalized]: {"requestId":"26","userActivated":false}
+
+      requestIdToApply:26
+      e.args.requestId.toNumber():26
+      
+[RequestFinalized]: {"requestId":"27","userActivated":false}
+
+      requestIdToApply:27
+      e.args.requestId.toNumber():27
+      
+      ✓ should finalize requests (262964 gas)
+    8: Fork#0 Epoch#15 (testEpochsWithRequest)
+
+    checking Epoch#0#15
+      ✓ NRE#15: user can make an enter request for ether deposit (1554372 gas)
+      ✓ NRE#15: user can make an enter request for token deposit (3282588 gas)
+[EpochPrepared]: {"forkNumber":"0","epochNumber":"16","startBlockNumber":"22","endBlockNumber":"22","requestStart":"28","requestEnd":"35","epochIsEmpty":false,"isRequest":true,"userActivated":false,"rebase":false}
+[BlockSubmitted]: {"fork":"0","epochNumber":"15","blockNumber":"20","isRequest":false,"userActivated":false}
+[BlockSubmitted]: {"fork":"0","epochNumber":"15","blockNumber":"21","isRequest":false,"userActivated":false}
+
+      Epoch#0.15 {"requestStart":"0","requestEnd":"0","startBlockNumber":"20","endBlockNumber":"21","firstRequestBlockId":"0","numEnter":"0","nextEnterEpoch":"0","isEmpty":false,"initialized":true,"isRequest":false,"userActivated":false,"rebase":false}
+      ORBs.length: 6
+      
+
+        Block#20 {"epochNumber":"15","requestBlockId":"0","referenceBlock":"0","timestamp":"1545849068","statesRoot":"0x0ded2f89db1e11454ba4ba90e31850587943ed4a412f2ddf422bd948eae8b164","transactionsRoot":"0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421","receiptsRoot":"0x000000000000000000000000000000000000000000000000000000000000dead","isRequest":false,"userActivated":false,"challenged":false,"challenging":false,"finalized":false}
+
+        Block#21 {"epochNumber":"15","requestBlockId":"0","referenceBlock":"0","timestamp":"1545849068","statesRoot":"0x0ded2f89db1e11454ba4ba90e31850587943ed4a412f2ddf422bd948eae8b164","transactionsRoot":"0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421","receiptsRoot":"0x000000000000000000000000000000000000000000000000000000000000dead","isRequest":false,"userActivated":false,"challenged":false,"challenging":false,"finalized":false}
+
+    checking Epoch#0#16
+epoch1: {"requestStart":"28","requestEnd":"35","startBlockNumber":"22","endBlockNumber":"22","firstRequestBlockId":"4","numEnter":"8","nextEnterEpoch":"0","isEmpty":false,"initialized":true,"isRequest":true,"userActivated":false,"rebase":false}
+
+        Epoch?
+         - last: 16
+         - previous requeast epoch: 14
+        
+      ✓ NRE#15: operator submits NRBs (403648 gas)
+
+      Epoch#0.16 {"requestStart":"28","requestEnd":"35","startBlockNumber":"22","endBlockNumber":"22","firstRequestBlockId":"4","numEnter":"8","nextEnterEpoch":"0","isEmpty":false,"initialized":true,"isRequest":true,"userActivated":false,"rebase":false}
+      ORBs.length: 6
+      
+
+        Block#22 {"epochNumber":"0","requestBlockId":"4","referenceBlock":"0","timestamp":"0","statesRoot":"0x0000000000000000000000000000000000000000000000000000000000000000","transactionsRoot":"0x0000000000000000000000000000000000000000000000000000000000000000","receiptsRoot":"0x0000000000000000000000000000000000000000000000000000000000000000","isRequest":true,"userActivated":false,"challenged":false,"challenging":false,"finalized":false}
+[EpochPrepared]: {"forkNumber":"0","epochNumber":"17","startBlockNumber":"23","endBlockNumber":"24","requestStart":"0","requestEnd":"0","epochIsEmpty":false,"isRequest":false,"userActivated":false,"rebase":false}
+[BlockSubmitted]: {"fork":"0","epochNumber":"16","blockNumber":"22","isRequest":true,"userActivated":false}
+
+    checking Epoch#0#16
+epoch1: {"requestStart":"28","requestEnd":"35","startBlockNumber":"22","endBlockNumber":"22","firstRequestBlockId":"4","numEnter":"9","nextEnterEpoch":"0","isEmpty":false,"initialized":true,"isRequest":true,"userActivated":false,"rebase":false}
+
+        Epoch?
+         - last: 16
+         - previous requeast epoch: 14
+        
+
+    checking Epoch#0#17
+      ✓ ORE#16: operator submits ORBs (194399 gas)
+
+      lastBlock: 22
+      lastFinalizedBlock: 19
+    
+
+      lastBlock: 22
+      lastFinalizedBlock: 21
+    
+[BlockFinalized]: {"forkNumber":"0","blockNumber":"22"}
+[EpochFinalized]: {"forkNumber":"0","epochNumber":"15","startBlockNumber":"20","endBlockNumber":"21"}
+      ✓ can finalize blocks (116906 gas)
+
+      requestIdToApply:28
+      e.args.requestId.toNumber():28
+      
+[RequestFinalized]: {"requestId":"28","userActivated":false}
+
+      requestIdToApply:29
+      e.args.requestId.toNumber():29
+      
+[RequestFinalized]: {"requestId":"29","userActivated":false}
+
+      requestIdToApply:30
+      e.args.requestId.toNumber():30
+      
+[RequestFinalized]: {"requestId":"30","userActivated":false}
+
+      requestIdToApply:31
+      e.args.requestId.toNumber():31
+      
+[RequestFinalized]: {"requestId":"31","userActivated":false}
+
+      requestIdToApply:32
+      e.args.requestId.toNumber():32
+      
+[RequestFinalized]: {"requestId":"32","userActivated":false}
+
+      requestIdToApply:33
+      e.args.requestId.toNumber():33
+      
+[RequestFinalized]: {"requestId":"33","userActivated":false}
+[RequestFinalized]: {"requestId":"34","userActivated":false}
+
+      requestIdToApply:34
+      e.args.requestId.toNumber():34
+      
+[RequestFinalized]: {"requestId":"35","userActivated":false}
+
+      requestIdToApply:35
+      e.args.requestId.toNumber():35
+      
+      ✓ should finalize requests (355184 gas)
+    9: Fork#0 Epoch#17 (testEpochsWithInvalidExitRequest)
+
+        Epoch#16 28,35,22,22,4,9,0,false,true,true,false,false
+        Epoch#17 0,0,23,24,0,0,0,false,true,false,false,false
+        
+      ✓ NRE#17: user can make an invalid exit request for token withdrawal (3224584 gas)
+[EpochPrepared]: {"forkNumber":"0","epochNumber":"18","startBlockNumber":"25","endBlockNumber":"25","requestStart":"36","requestEnd":"39","epochIsEmpty":false,"isRequest":true,"userActivated":false,"rebase":false}
+[BlockSubmitted]: {"fork":"0","epochNumber":"17","blockNumber":"23","isRequest":false,"userActivated":false}
+[BlockSubmitted]: {"fork":"0","epochNumber":"17","blockNumber":"24","isRequest":false,"userActivated":false}
+
+    checking Epoch#0#17
+
+    checking Epoch#0#18
+epoch1: {"requestStart":"36","requestEnd":"39","startBlockNumber":"25","endBlockNumber":"25","firstRequestBlockId":"5","numEnter":"0","nextEnterEpoch":"0","isEmpty":false,"initialized":true,"isRequest":true,"userActivated":false,"rebase":false}
+
+        Epoch?
+         - last: 18
+         - previous requeast epoch: 16
+        
+      ✓ NRE#17: operator submits NRBs (406750 gas)
+
+    checking Epoch#0#18
+epoch1: {"requestStart":"36","requestEnd":"39","startBlockNumber":"25","endBlockNumber":"25","firstRequestBlockId":"5","numEnter":"7","nextEnterEpoch":"0","isEmpty":false,"initialized":true,"isRequest":true,"userActivated":false,"rebase":false}
+
+        Epoch?
+         - last: 18
+         - previous requeast epoch: 16
+        
+
+    checking Epoch#0#19
+      ✓ ORE#18: operator submits ORBs (194399 gas)
+[EpochPrepared]: {"forkNumber":"0","epochNumber":"19","startBlockNumber":"26","endBlockNumber":"27","requestStart":"0","requestEnd":"0","epochIsEmpty":false,"isRequest":false,"userActivated":false,"rebase":false}
+[BlockSubmitted]: {"fork":"0","epochNumber":"18","blockNumber":"25","isRequest":true,"userActivated":false}
+
+      lastBlock: 25
+      lastFinalizedBlock: 22
+    
+
+      lastBlock: 25
+      lastFinalizedBlock: 24
+    
+      ✓ can finalize blocks (116906 gas)
+[BlockFinalized]: {"forkNumber":"0","blockNumber":"25"}
+[EpochFinalized]: {"forkNumber":"0","epochNumber":"17","startBlockNumber":"23","endBlockNumber":"24"}
+
+      Epoch#0.18 {"requestStart":"36","requestEnd":"39","startBlockNumber":"25","endBlockNumber":"25","firstRequestBlockId":"5","numEnter":"7","nextEnterEpoch":"0","isEmpty":false,"initialized":true,"isRequest":true,"userActivated":false,"rebase":false}
+      ORBs.length: 7
+      
+
+        Block#25 {"epochNumber":"18","requestBlockId":"5","referenceBlock":"0","timestamp":"1545849094","statesRoot":"0x0ded2f89db1e11454ba4ba90e31850587943ed4a412f2ddf422bd948eae8b164","transactionsRoot":"0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421","receiptsRoot":"0x000000000000000000000000000000000000000000000000000000000000dead","isRequest":true,"userActivated":false,"challenged":false,"challenging":false,"finalized":true}
+
+      5) can challenge on invalid exit
+    > No events were emitted
+      ✓ should finalize invalid requests
+    10: Fork#0 Epoch#19 (testEpochsWithInvalidExitRequest)
+
+        Epoch#18 36,39,25,25,5,7,0,false,true,true,false,false
+        Epoch#19 0,0,26,27,0,0,0,false,true,false,false,false
+        
+[RequestFinalized]: {"requestId":"36","userActivated":false}
+
+      requestIdToApply:36
+      e.args.requestId.toNumber():36
+      
+      ✓ NRE#19: user can make an invalid exit request for token withdrawal (3290325 gas)
+
+      6) "before each" hook: before test
+
+·-----------------------------------------------------------------|------------------------------·
+|                               [32m[1mGas[22m[39m                               ·  [90mBlock limit: 100000000 gas[39m  │
+································|·································|·······························
+|  [32m[1mMethods[22m[39m                      ·           [90m21 gwei/gas[39m           ·        [31m127.96 usd/eth[39m        │
+··············|·················|··········|··········|···········|···············|···············
+|  [1mContract[22m   ·  [1mMethod[22m         ·  [32mMin[39m     ·  [32mMax[39m     ·  [32mAvg[39m      ·  [1m# calls[22m      ·  [1musd (avg)[22m   │
+··············|·················|··········|··········|···········|···············|···············
+|  [90mRootChain[39m  ·  applyRequest   ·   [36m44398[39m  ·   [31m65889[39m  ·    50527  ·           [90m35[39m  ·        [32m0.14[39m  │
+··············|·················|··········|··········|···········|···············|···············
+|  [90mRootChain[39m  ·  challengeExit  ·   [36m47434[39m  ·   [31m47498[39m  ·    47482  ·            [90m4[39m  ·        [32m0.13[39m  │
+··············|·················|··········|··········|···········|···············|···············
+|  [90mRootChain[39m  ·  finalizeBlock  ·   [36m37166[39m  ·   [31m79740[39m  ·    57448  ·           [90m18[39m  ·        [32m0.15[39m  │
+··············|·················|··········|··········|···········|···············|···············
+|  [90mRootChain[39m  ·  startEnter     ·  [36m374710[39m  ·  [31m820663[39m  ·   604620  ·           [90m24[39m  ·        [32m1.62[39m  │
+··············|·················|··········|··········|···········|···············|···············
+|  [90mRootChain[39m  ·  startExit      ·  [36m795837[39m  ·  [31m836561[39m  ·   806582  ·           [90m20[39m  ·        [32m2.17[39m  │
+··············|·················|··········|··········|···········|···············|···············
+|  [90mRootChain[39m  ·  submitNRB      ·  [36m122565[39m  ·  [31m314486[39m  ·   206964  ·           [90m14[39m  ·        [32m0.56[39m  │
+··············|·················|··········|··········|···········|···············|···············
+|  [90mRootChain[39m  ·  submitORB      ·       -  ·       -  ·   194399  ·            [90m5[39m  ·        [32m0.52[39m  │
+··············|·················|··········|··········|···········|···············|···············
+|  [32m[1mDeployments[22m[39m                  ·                                 ·  [1m% of limit[22m   ·              │
+································|··········|··········|···········|···············|···············
+|  EpochHandler                 ·       -  ·       -  ·  2739838  ·        [90m2.7 %[39m  ·        [32m7.36[39m  │
+································|··········|··········|···········|···············|···············
+|  RootChain                    ·       -  ·       -  ·  5790746  ·        [90m5.8 %[39m  ·       [32m15.56[39m  │
+·-------------------------------|----------|----------|-----------|---------------|--------------·
+
+  40 passing (2m)
+  6 failing
+
+  1) Contract: RootChain
+       2: Fork#0 Epoch#3 (testEpochsWithInvalidExitRequest)
+         NRE#3: operator submits NRBs:
+
+      AssertionError: expected '0' to equal '1'
+      + expected - actual
+
+      -0
+      +1
+      
+      at checkEpoch (test/RootChain.test.js:261:60)
+      at <anonymous>
+      at process._tickCallback (internal/process/next_tick.js:189:7)
+
+  2) Contract: RootChain
+       2: Fork#0 Epoch#3 (testEpochsWithInvalidExitRequest)
+         ORE#4: operator submits ORBs:
+
+      AssertionError: expected '0' to equal '1'
+      + expected - actual
+
+      -0
+      +1
+      
+      at checkEpoch (test/RootChain.test.js:261:60)
+      at <anonymous>
+      at process._tickCallback (internal/process/next_tick.js:189:7)
+
+  3) Contract: RootChain
+       4: Fork#0 Epoch#7 (testEpochsWithRequest)
+         NRE#7: operator submits NRBs:
+
+      AssertionError: expected '0' to equal '1'
+      + expected - actual
+
+      -0
+      +1
+      
+      at checkEpoch (test/RootChain.test.js:261:60)
+      at <anonymous>
+      at process._tickCallback (internal/process/next_tick.js:189:7)
+
+  4) Contract: RootChain
+       4: Fork#0 Epoch#7 (testEpochsWithRequest)
+         ORE#8: operator submits ORBs:
+
+      AssertionError: expected '0' to equal '1'
+      + expected - actual
+
+      -0
+      +1
+      
+      at checkEpoch (test/RootChain.test.js:261:60)
+      at <anonymous>
+      at process._tickCallback (internal/process/next_tick.js:189:7)
+
+  5) Contract: RootChain
+       9: Fork#0 Epoch#17 (testEpochsWithInvalidExitRequest)
+         can challenge on invalid exit:
+     Error: VM Exception while processing transaction: revert
+      at Object.InvalidResponse (node_modules/truffle/build/webpack:/~/web3/lib/web3/errors.js:38:1)
+      at node_modules/truffle/build/webpack:/~/web3/lib/web3/requestmanager.js:86:1
+      at node_modules/truffle/build/webpack:/packages/truffle-provider/wrapper.js:134:1
+      at XMLHttpRequest.request.onreadystatechange (node_modules/truffle/build/webpack:/~/web3/lib/web3/httpprovider.js:128:1)
+      at XMLHttpRequestEventTarget.dispatchEvent (node_modules/truffle/build/webpack:/~/xhr2/lib/xhr2.js:64:1)
+      at XMLHttpRequest._setReadyState (node_modules/truffle/build/webpack:/~/xhr2/lib/xhr2.js:354:1)
+      at XMLHttpRequest._onHttpResponseEnd (node_modules/truffle/build/webpack:/~/xhr2/lib/xhr2.js:509:1)
+      at IncomingMessage.<anonymous> (node_modules/truffle/build/webpack:/~/xhr2/lib/xhr2.js:469:1)
+      at endReadableNT (_stream_readable.js:1064:12)
+      at _combinedTickCallback (internal/process/next_tick.js:139:11)
+      at process._tickCallback (internal/process/next_tick.js:181:9)
+
+  6) Contract: RootChain
+       "before each" hook: before test:
+
+      Uncaught AssertionError: expected false to equal true
+      + expected - actual
+
+      -false
+      +true
+      
+      at applyRequests (test/RootChain.test.js:423:39)
+      at <anonymous>
+      at process._tickCallback (internal/process/next_tick.js:189:7)
+
+
+

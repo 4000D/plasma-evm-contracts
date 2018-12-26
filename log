@@ -1,0 +1,565 @@
+
+> plasma-evm-contracts@1.0.0 test:verbose /Users/pjh/workspace/plasma-evm-contracts
+> VERBOSE=true scripts/test.sh ./test/RootChain.test.js
+
+Using existing ganache instance
+Truffle v4.1.14 (core: 4.1.14)
+Solidity v0.4.24 (solc-js)
+node_modules/.bin/truffle test ./test/RootChain.test.js
+Using network 'development'.
+
+Compiling ./contracts/EpochHandler.sol...
+Compiling ./contracts/RequestableContractI.sol...
+Compiling ./contracts/RootChain.sol...
+Compiling ./contracts/RootChainEvent.sol...
+Compiling ./contracts/RootChainStorage.sol...
+Compiling ./contracts/lib/Address.sol...
+Compiling ./contracts/lib/BMT.sol...
+Compiling ./contracts/lib/Data.sol...
+Compiling ./contracts/lib/Math.sol...
+Compiling ./contracts/lib/RLP.sol...
+Compiling ./contracts/lib/RLPEncode.sol...
+Compiling ./contracts/lib/SafeMath.sol...
+
+Compilation warnings encountered:
+
+/Users/pjh/workspace/plasma-evm-contracts/contracts/lib/Data.sol:2:1: Warning: Experimental features are turned on. Do not use experimental features on live deployments.
+pragma experimental ABIEncoderV2;
+^-------------------------------^
+,/Users/pjh/workspace/plasma-evm-contracts/contracts/RootChain.sol:681:60: Warning: This declaration shadows an existing declaration.
+  function lastBlock(uint forkNumber) public view returns (uint lastBlock) {
+                                                           ^------------^
+/Users/pjh/workspace/plasma-evm-contracts/contracts/RootChain.sol:681:3: The shadowed declaration is here:
+  function lastBlock(uint forkNumber) public view returns (uint lastBlock) {
+  ^ (Relevant source part starts here and spans across multiple lines).
+
+,/Users/pjh/workspace/plasma-evm-contracts/contracts/RootChain.sol:685:60: Warning: This declaration shadows an existing declaration.
+  function lastEpoch(uint forkNumber) public view returns (uint lastBlock) {
+                                                           ^------------^
+/Users/pjh/workspace/plasma-evm-contracts/contracts/RootChain.sol:681:3: The shadowed declaration is here:
+  function lastBlock(uint forkNumber) public view returns (uint lastBlock) {
+  ^ (Relevant source part starts here and spans across multiple lines).
+
+,/Users/pjh/workspace/plasma-evm-contracts/contracts/lib/Data.sol:606:17: Warning: Unused function parameter. Remove or comment out the variable name to silence this warning.
+  function init(RequestBlock storage self) internal {
+                ^-----------------------^
+,/Users/pjh/workspace/plasma-evm-contracts/contracts/lib/Data.sol:615:5: Warning: Unused function parameter. Remove or comment out the variable name to silence this warning.
+    RequestBlock storage self,
+    ^-----------------------^
+,/Users/pjh/workspace/plasma-evm-contracts/contracts/RootChain.sol:485:5: Warning: Unused function parameter. Remove or comment out the variable name to silence this warning.
+    bytes _key,
+    ^--------^
+,/Users/pjh/workspace/plasma-evm-contracts/contracts/RootChain.sol:486:5: Warning: Unused function parameter. Remove or comment out the variable name to silence this warning.
+    bytes _txByte, // RLP encoded transaction
+    ^-----------^
+,/Users/pjh/workspace/plasma-evm-contracts/contracts/RootChain.sol:487:5: Warning: Unused function parameter. Remove or comment out the variable name to silence this warning.
+    uint _branchMask,
+    ^--------------^
+,/Users/pjh/workspace/plasma-evm-contracts/contracts/RootChain.sol:488:5: Warning: Unused function parameter. Remove or comment out the variable name to silence this warning.
+    bytes32[] _siblings
+    ^-----------------^
+,/Users/pjh/workspace/plasma-evm-contracts/contracts/RootChain.sol:552:5: Warning: Unused local variable.
+    Data.Fork storage fork = forks[currentFork];
+    ^--------------------^
+,/Users/pjh/workspace/plasma-evm-contracts/contracts/RootChain.sol:690:5: Warning: Unused function parameter. Remove or comment out the variable name to silence this warning.
+    uint forkNumber,
+    ^-------------^
+,/Users/pjh/workspace/plasma-evm-contracts/contracts/RootChain.sol:825:5: Warning: Unused function parameter. Remove or comment out the variable name to silence this warning.
+    bool _userActivated
+    ^-----------------^
+,/Users/pjh/workspace/plasma-evm-contracts/contracts/EpochHandler.sol:308:3: Warning: Function state mutability can be restricted to view
+  function _getLatestRequestInfo()
+  ^ (Relevant source part starts here and spans across multiple lines).
+,/Users/pjh/workspace/plasma-evm-contracts/contracts/RootChain.sol:483:3: Warning: Function state mutability can be restricted to view
+  function challengeNullAddress(
+  ^ (Relevant source part starts here and spans across multiple lines).
+,/Users/pjh/workspace/plasma-evm-contracts/contracts/lib/Data.sol:242:3: Warning: Function state mutability can be restricted to view
+  function getLastEpochNumber(Fork storage _f, bool _isRequest) internal returns (uint) {
+  ^ (Relevant source part starts here and spans across multiple lines).
+,/Users/pjh/workspace/plasma-evm-contracts/contracts/lib/Data.sol:606:3: Warning: Function state mutability can be restricted to pure
+  function init(RequestBlock storage self) internal {
+  ^ (Relevant source part starts here and spans across multiple lines).
+,/Users/pjh/workspace/plasma-evm-contracts/contracts/lib/Data.sol:759:3: Warning: Function state mutability can be restricted to view
+  function _checkTxRoot(
+  ^ (Relevant source part starts here and spans across multiple lines).
+
+
+  Contract: RootChain
+
+      EpochHandler contract at 0x3e8a0665538c7d2b9130583c7391a3f286a62fe3
+      RootChain contract at 0x5adf7abd41b6474e0a6f38ee425003be83878a4b
+      
+    1: Fork#0 Epoch#1 (testEpochsWithoutRequest)
+
+      [testEpochsWithoutRequest]
+      NRBEPochNumber: 1
+      forks[currentFork].lastEpoch: 1
+      rootchain.forks: {"forkedBlock":"0","firstEpoch":"0","lastEpoch":"1","firstBlock":"0","lastBlock":"0","lastFinalizedBlock":"0","timestamp":"0","firstEnterEpoch":"0","lastEnterEpoch":"0","nextBlockToRebase":"0","rebased":false}
+      rootchain.lastEpoch: {"requestStart":"0","requestEnd":"0","startBlockNumber":"1","endBlockNumber":"2","firstRequestBlockId":"0","numEnter":"0","nextEnterEpoch":"0","isEmpty":false,"initialized":true,"isRequest":false,"userActivated":false,"rebase":false}
+      
+
+      1) "before all" hook: check NRE#1 parameters
+    2: Fork#0 Epoch#3 (testEpochsWithInvalidExitRequest)
+
+        Epoch#0 0,0,0,0,0,0,0,false,true,false,false,false
+        Epoch#1 0,0,1,2,0,0,0,false,true,false,false,false
+        
+      ✓ NRE#3: user can make an invalid exit request for token withdrawal (3234335 gas)
+
+      2) NRE#3: operator submits NRBs
+    > No events were emitted
+
+      3) ORE#4: operator submits ORBs
+    > No events were emitted
+
+      lastBlock: 1
+      lastFinalizedBlock: 0
+    
+
+      4) can finalize blocks
+    > No events were emitted
+
+      Epoch#0.4 {"requestStart":"0","requestEnd":"0","startBlockNumber":"0","endBlockNumber":"0","firstRequestBlockId":"0","numEnter":"0","nextEnterEpoch":"0","isEmpty":false,"initialized":false,"isRequest":false,"userActivated":false,"rebase":false}
+      ORBs.length: 1
+      
+
+        Block#0 {"epochNumber":"0","requestBlockId":"0","referenceBlock":"0","timestamp":"0","statesRoot":"0x0ded2f89db1e11454ba4ba90e31850587943ed4a412f2ddf422bd948eae8b164","transactionsRoot":"0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421","receiptsRoot":"0x0000000000000000000000000000000000000000000000000000000000000000","isRequest":false,"userActivated":false,"challenged":false,"challenging":false,"finalized":true}
+
+      5) can challenge on invalid exit
+    > No events were emitted
+      ✓ should finalize invalid requests
+
+      lastBlock: 1
+      lastFinalizedBlock: 0
+    
+    3: Fork#0 Epoch#5 (testEpochsWithoutRequest)
+
+      [testEpochsWithoutRequest]
+      NRBEPochNumber: 5
+      forks[currentFork].lastEpoch: 1
+      rootchain.forks: {"forkedBlock":"0","firstEpoch":"0","lastEpoch":"1","firstBlock":"0","lastBlock":"0","lastFinalizedBlock":"0","timestamp":"0","firstEnterEpoch":"0","lastEnterEpoch":"0","nextBlockToRebase":"0","rebased":false}
+      rootchain.lastEpoch: {"requestStart":"0","requestEnd":"0","startBlockNumber":"1","endBlockNumber":"2","firstRequestBlockId":"0","numEnter":"0","nextEnterEpoch":"0","isEmpty":false,"initialized":true,"isRequest":false,"userActivated":false,"rebase":false}
+      
+
+      6) "before all" hook: check NRE#5 parameters
+    4: Fork#0 Epoch#7 (testEpochsWithRequest)
+
+      7) "before all" hook: check NRE#5 parameters
+      5: Fork#0 Epoch#9 (testEpochsWithExitRequest)
+
+    checking Epoch#0#1
+
+        Epoch#0 0,0,0,0,0,0,0,false,true,false,false,false
+        Epoch#1 0,0,1,2,0,0,0,false,true,false,false,false
+        
+
+        8) "before all" hook: check NRE#7 parameters
+      6: Fork#0 Epoch#11 (testEpochsWithRequest)
+
+    checking Epoch#0#1
+
+        9) "before all" hook: check NRE#11 parameters
+      7: Fork#0 Epoch#13 (testEpochsWithExitRequest)
+
+        10) "before all" hook: check NRE#11 parameters
+        8: Fork#0 Epoch#15 (testEpochsWithRequest)
+
+        Epoch#0 0,0,0,0,0,0,0,false,true,false,false,false
+        Epoch#1 0,0,1,2,0,0,0,false,true,false,false,false
+        
+
+    checking Epoch#0#1
+
+          11) "before all" hook: check NRE#15 parameters
+        9: Fork#0 Epoch#17 (testEpochsWithInvalidExitRequest)
+
+        Epoch#0 0,0,0,0,0,0,0,false,true,false,false,false
+        Epoch#1 0,0,1,2,0,0,0,false,true,false,false,false
+        
+          ✓ NRE#17: user can make an invalid exit request for token withdrawal
+
+          12) NRE#13: operator submits NRBs
+          ✓ NRE#13: operator submits NRBs
+    > No events were emitted
+
+          13) ORE#14: operator submits ORBs
+
+          14) ORE#14: operator submits ORBs
+    > No events were emitted
+    > No events were emitted
+
+      lastBlock: 1
+      lastFinalizedBlock: 0
+    
+
+      lastBlock: 1
+      lastFinalizedBlock: 0
+    
+
+          15) can finalize blocks
+
+          16) can finalize blocks
+    > No events were emitted
+    > No events were emitted
+
+      lastBlock: 1
+      lastFinalizedBlock: 0
+    
+
+      lastBlock: 1
+      lastFinalizedBlock: 0
+    
+
+          17) should finalize requests
+
+          18) should finalize requests
+    > No events were emitted
+    > No events were emitted
+        10: Fork#0 Epoch#19 (testEpochsWithInvalidExitRequest)
+
+        Epoch#0 0,0,0,0,0,0,0,false,true,false,false,false
+        Epoch#1 0,0,1,2,0,0,0,false,true,false,false,false
+        
+
+      Epoch#0.18 {"requestStart":"0","requestEnd":"0","startBlockNumber":"0","endBlockNumber":"0","firstRequestBlockId":"0","numEnter":"0","nextEnterEpoch":"0","isEmpty":false,"initialized":false,"isRequest":false,"userActivated":false,"rebase":false}
+      ORBs.length: 1
+      
+
+        Block#0 {"epochNumber":"0","requestBlockId":"0","referenceBlock":"0","timestamp":"0","statesRoot":"0x0ded2f89db1e11454ba4ba90e31850587943ed4a412f2ddf422bd948eae8b164","transactionsRoot":"0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421","receiptsRoot":"0x0000000000000000000000000000000000000000000000000000000000000000","isRequest":false,"userActivated":false,"challenged":false,"challenging":false,"finalized":true}
+
+          19) NRE#19: user can make an invalid exit request for token withdrawal
+
+    Events emitted during test:
+    ---------------------------
+
+    RequestCreated(requestId: 16, requestor: 0x5df7107c960320b90a3d7ed9a83203d1f98a811d, to: 0xe0ec8dc8537f749bf526c8805e18f2dfc7b9fe89, weiAmount: 0, trieKey: 0x15f7625bcef70c45e53f7565d01aea362a454eedc470d6407e428f6f1cf9d1eb, trieValue: 0x0000000000000000000000000000000000000000000000056bc75e2d63100000, isTransfer: false, isExit: true, userActivated: false)
+    RequestCreated(requestId: 17, requestor: 0x3cd9f729c8d882b851f8c70fb36d22b391a288cd, to: 0xe0ec8dc8537f749bf526c8805e18f2dfc7b9fe89, weiAmount: 0, trieKey: 0x3e9fdd8ad16bfb833fa3716d134182dff6cab4e345a0d6f1fea8c9aa3c0bdae9, trieValue: 0x0000000000000000000000000000000000000000000000056bc75e2d63100000, isTransfer: false, isExit: true, userActivated: false)
+    RequestCreated(requestId: 18, requestor: 0x57ab89f4eabdffce316809d790d5c93a49908510, to: 0xe0ec8dc8537f749bf526c8805e18f2dfc7b9fe89, weiAmount: 0, trieKey: 0xb37bec4f454d9a74dc6a2e084ed24d5f0a10284638278108d1c473384ce31522, trieValue: 0x0000000000000000000000000000000000000000000000056bc75e2d63100000, isTransfer: false, isExit: true, userActivated: false)
+    RequestCreated(requestId: 19, requestor: 0x6c278df36922fea54cf6f65f725267e271f60dd9, to: 0xe0ec8dc8537f749bf526c8805e18f2dfc7b9fe89, weiAmount: 0, trieKey: 0x91537931c8cc903cdec2136bf568859158aacff6494f930f414e1ff05d009efe, trieValue: 0x0000000000000000000000000000000000000000000000056bc75e2d63100000, isTransfer: false, isExit: true, userActivated: false)
+
+    ---------------------------
+          ✓ should finalize invalid requests
+          ✓ should finalize invalid requests
+        11: Fork#0 Epoch#21 (testEpochsWithExitRequest)
+
+      lastBlock: 1
+      lastFinalizedBlock: 0
+    
+
+        Epoch#0 0,0,0,0,0,0,0,false,true,false,false,false
+        Epoch#1 0,0,1,2,0,0,0,false,true,false,false,false
+        
+
+          20) "before each" hook: before test
+·-------------------------------------------------------------|------------------------------·
+|                             [32m[1mGas[22m[39m                             ·  [90mBlock limit: 100000000 gas[39m  │
+····························|·································|·······························
+|  [32m[1mMethods[22m[39m                  ·           [90m21 gwei/gas[39m           ·        [31m127.85 usd/eth[39m        │
+··············|·············|··········|··········|···········|···············|···············
+|  [1mContract[22m   ·  [1mMethod[22m     ·  [32mMin[39m     ·  [32mMax[39m     ·  [32mAvg[39m      ·  [1m# calls[22m      ·  [1musd (avg)[22m   │
+··············|·············|··········|··········|···········|···············|···············
+|  [90mRootChain[39m  ·  startExit  ·  [36m795965[39m  ·  [31m831312[39m  ·   808584  ·            [90m4[39m  ·        [32m2.17[39m  │
+··············|·············|··········|··········|···········|···············|···············
+|  [32m[1mDeployments[22m[39m              ·                                 ·  [1m% of limit[22m   ·              │
+····························|··········|··········|···········|···············|···············
+|  EpochHandler             ·       -  ·       -  ·  2739838  ·        [90m2.7 %[39m  ·        [32m7.36[39m  │
+····························|··········|··········|···········|···············|···············
+|  RootChain                ·       -  ·       -  ·  5790746  ·        [90m5.8 %[39m  ·       [32m15.55[39m  │
+·---------------------------|----------|----------|-----------|---------------|--------------·
+
+  6 passing (38s)
+  20 failing
+
+  1) Contract: RootChain
+       1: Fork#0 Epoch#1 (testEpochsWithoutRequest)
+         "before all" hook: check NRE#1 parameters:
+
+      AssertionError: expected '0' to equal '1'
+      + expected - actual
+
+      -0
+      +1
+      
+      at checkLastBlockNumber (test/RootChain.test.js:332:28)
+      at <anonymous>
+      at process._tickCallback (internal/process/next_tick.js:189:7)
+
+  2) Contract: RootChain
+       2: Fork#0 Epoch#3 (testEpochsWithInvalidExitRequest)
+         NRE#3: operator submits NRBs:
+
+      AssertionError: expected '0' to equal '1'
+      + expected - actual
+
+      -0
+      +1
+      
+      at checkLastBlockNumber (test/RootChain.test.js:332:28)
+      at <anonymous>
+      at process._tickCallback (internal/process/next_tick.js:189:7)
+
+  3) Contract: RootChain
+       2: Fork#0 Epoch#3 (testEpochsWithInvalidExitRequest)
+         ORE#4: operator submits ORBs:
+
+      AssertionError: expected '0' to equal '1'
+      + expected - actual
+
+      -0
+      +1
+      
+      at checkLastBlockNumber (test/RootChain.test.js:332:28)
+      at <anonymous>
+      at process._tickCallback (internal/process/next_tick.js:189:7)
+
+  4) Contract: RootChain
+       2: Fork#0 Epoch#3 (testEpochsWithInvalidExitRequest)
+         can finalize blocks:
+     Error: VM Exception while processing transaction: revert
+      at Object.InvalidResponse (node_modules/truffle/build/webpack:/~/web3/lib/web3/errors.js:38:1)
+      at node_modules/truffle/build/webpack:/~/web3/lib/web3/requestmanager.js:86:1
+      at node_modules/truffle/build/webpack:/packages/truffle-provider/wrapper.js:134:1
+      at XMLHttpRequest.request.onreadystatechange (node_modules/truffle/build/webpack:/~/web3/lib/web3/httpprovider.js:128:1)
+      at XMLHttpRequestEventTarget.dispatchEvent (node_modules/truffle/build/webpack:/~/xhr2/lib/xhr2.js:64:1)
+      at XMLHttpRequest._setReadyState (node_modules/truffle/build/webpack:/~/xhr2/lib/xhr2.js:354:1)
+      at XMLHttpRequest._onHttpResponseEnd (node_modules/truffle/build/webpack:/~/xhr2/lib/xhr2.js:509:1)
+      at IncomingMessage.<anonymous> (node_modules/truffle/build/webpack:/~/xhr2/lib/xhr2.js:469:1)
+      at endReadableNT (_stream_readable.js:1064:12)
+      at _combinedTickCallback (internal/process/next_tick.js:139:11)
+      at process._tickCallback (internal/process/next_tick.js:181:9)
+
+  5) Contract: RootChain
+       2: Fork#0 Epoch#3 (testEpochsWithInvalidExitRequest)
+         can challenge on invalid exit:
+
+      AssertionError: expected false to equal true
+      + expected - actual
+
+      -false
+      +true
+      
+      at Context.it (test/RootChain.test.js:749:33)
+      at <anonymous>
+      at process._tickCallback (internal/process/next_tick.js:189:7)
+
+  6) Contract: RootChain
+       3: Fork#0 Epoch#5 (testEpochsWithoutRequest)
+         "before all" hook: check NRE#5 parameters:
+
+      AssertionError: expected '0' to equal '1'
+      + expected - actual
+
+      -0
+      +1
+      
+      at checkLastBlockNumber (test/RootChain.test.js:332:28)
+      at <anonymous>
+      at process._tickCallback (internal/process/next_tick.js:189:7)
+
+  7) Contract: RootChain
+       3: Fork#0 Epoch#5 (testEpochsWithoutRequest)
+         "before all" hook: check NRE#5 parameters:
+
+      AssertionError: expected '0' to equal '1'
+      + expected - actual
+
+      -0
+      +1
+      
+      at checkLastBlockNumber (test/RootChain.test.js:332:28)
+      at <anonymous>
+      at process._tickCallback (internal/process/next_tick.js:189:7)
+
+  8) Contract: RootChain
+       4: Fork#0 Epoch#7 (testEpochsWithRequest)
+         "before all" hook: check NRE#7 parameters:
+
+      AssertionError: expected '0' to equal '1'
+      + expected - actual
+
+      -0
+      +1
+      
+      at checkLastBlockNumber (test/RootChain.test.js:332:28)
+      at <anonymous>
+      at process._tickCallback (internal/process/next_tick.js:189:7)
+
+  9) Contract: RootChain
+       6: Fork#0 Epoch#11 (testEpochsWithRequest)
+         "before all" hook: check NRE#11 parameters:
+
+      AssertionError: expected '0' to equal '1'
+      + expected - actual
+
+      -0
+      +1
+      
+      at checkLastBlockNumber (test/RootChain.test.js:332:28)
+      at <anonymous>
+      at process._tickCallback (internal/process/next_tick.js:189:7)
+
+  10) Contract: RootChain
+       6: Fork#0 Epoch#11 (testEpochsWithRequest)
+         "before all" hook: check NRE#11 parameters:
+
+      AssertionError: expected '0' to equal '1'
+      + expected - actual
+
+      -0
+      +1
+      
+      at checkLastBlockNumber (test/RootChain.test.js:332:28)
+      at <anonymous>
+      at process._tickCallback (internal/process/next_tick.js:189:7)
+
+  11) Contract: RootChain
+       8: Fork#0 Epoch#15 (testEpochsWithRequest)
+         "before all" hook: check NRE#15 parameters:
+
+      AssertionError: expected '0' to equal '1'
+      + expected - actual
+
+      -0
+      +1
+      
+      at checkLastBlockNumber (test/RootChain.test.js:332:28)
+      at <anonymous>
+      at process._tickCallback (internal/process/next_tick.js:189:7)
+
+  12) Contract: RootChain
+       7: Fork#0 Epoch#13 (testEpochsWithExitRequest)
+         NRE#13: operator submits NRBs:
+
+      AssertionError: expected '0' to equal '1'
+      + expected - actual
+
+      -0
+      +1
+      
+      at checkLastBlockNumber (test/RootChain.test.js:332:28)
+      at <anonymous>
+      at process._tickCallback (internal/process/next_tick.js:189:7)
+
+  13) Contract: RootChain
+       7: Fork#0 Epoch#13 (testEpochsWithExitRequest)
+         ORE#14: operator submits ORBs:
+
+      AssertionError: expected '0' to equal '1'
+      + expected - actual
+
+      -0
+      +1
+      
+      at checkLastBlockNumber (test/RootChain.test.js:332:28)
+      at <anonymous>
+      at process._tickCallback (internal/process/next_tick.js:189:7)
+
+  14) Contract: RootChain
+       7: Fork#0 Epoch#13 (testEpochsWithExitRequest)
+         ORE#14: operator submits ORBs:
+
+      AssertionError: expected '0' to equal '1'
+      + expected - actual
+
+      -0
+      +1
+      
+      at checkLastBlockNumber (test/RootChain.test.js:332:28)
+      at <anonymous>
+      at process._tickCallback (internal/process/next_tick.js:189:7)
+
+  15) Contract: RootChain
+       7: Fork#0 Epoch#13 (testEpochsWithExitRequest)
+         can finalize blocks:
+     Error: VM Exception while processing transaction: revert
+      at Object.InvalidResponse (node_modules/truffle/build/webpack:/~/web3/lib/web3/errors.js:38:1)
+      at node_modules/truffle/build/webpack:/~/web3/lib/web3/requestmanager.js:86:1
+      at node_modules/truffle/build/webpack:/packages/truffle-provider/wrapper.js:134:1
+      at XMLHttpRequest.request.onreadystatechange (node_modules/truffle/build/webpack:/~/web3/lib/web3/httpprovider.js:128:1)
+      at XMLHttpRequestEventTarget.dispatchEvent (node_modules/truffle/build/webpack:/~/xhr2/lib/xhr2.js:64:1)
+      at XMLHttpRequest._setReadyState (node_modules/truffle/build/webpack:/~/xhr2/lib/xhr2.js:354:1)
+      at XMLHttpRequest._onHttpResponseEnd (node_modules/truffle/build/webpack:/~/xhr2/lib/xhr2.js:509:1)
+      at IncomingMessage.<anonymous> (node_modules/truffle/build/webpack:/~/xhr2/lib/xhr2.js:469:1)
+      at endReadableNT (_stream_readable.js:1064:12)
+      at _combinedTickCallback (internal/process/next_tick.js:139:11)
+      at process._tickCallback (internal/process/next_tick.js:181:9)
+
+  16) Contract: RootChain
+       7: Fork#0 Epoch#13 (testEpochsWithExitRequest)
+         can finalize blocks:
+     Error: VM Exception while processing transaction: revert
+      at Object.InvalidResponse (node_modules/truffle/build/webpack:/~/web3/lib/web3/errors.js:38:1)
+      at node_modules/truffle/build/webpack:/~/web3/lib/web3/requestmanager.js:86:1
+      at node_modules/truffle/build/webpack:/packages/truffle-provider/wrapper.js:134:1
+      at XMLHttpRequest.request.onreadystatechange (node_modules/truffle/build/webpack:/~/web3/lib/web3/httpprovider.js:128:1)
+      at XMLHttpRequestEventTarget.dispatchEvent (node_modules/truffle/build/webpack:/~/xhr2/lib/xhr2.js:64:1)
+      at XMLHttpRequest._setReadyState (node_modules/truffle/build/webpack:/~/xhr2/lib/xhr2.js:354:1)
+      at XMLHttpRequest._onHttpResponseEnd (node_modules/truffle/build/webpack:/~/xhr2/lib/xhr2.js:509:1)
+      at IncomingMessage.<anonymous> (node_modules/truffle/build/webpack:/~/xhr2/lib/xhr2.js:469:1)
+      at endReadableNT (_stream_readable.js:1064:12)
+      at _combinedTickCallback (internal/process/next_tick.js:139:11)
+      at process._tickCallback (internal/process/next_tick.js:181:9)
+
+  17) Contract: RootChain
+       7: Fork#0 Epoch#13 (testEpochsWithExitRequest)
+         should finalize requests:
+     Error: VM Exception while processing transaction: revert
+      at Object.InvalidResponse (node_modules/truffle/build/webpack:/~/web3/lib/web3/errors.js:38:1)
+      at node_modules/truffle/build/webpack:/~/web3/lib/web3/requestmanager.js:86:1
+      at node_modules/truffle/build/webpack:/packages/truffle-provider/wrapper.js:134:1
+      at XMLHttpRequest.request.onreadystatechange (node_modules/truffle/build/webpack:/~/web3/lib/web3/httpprovider.js:128:1)
+      at XMLHttpRequestEventTarget.dispatchEvent (node_modules/truffle/build/webpack:/~/xhr2/lib/xhr2.js:64:1)
+      at XMLHttpRequest._setReadyState (node_modules/truffle/build/webpack:/~/xhr2/lib/xhr2.js:354:1)
+      at XMLHttpRequest._onHttpResponseEnd (node_modules/truffle/build/webpack:/~/xhr2/lib/xhr2.js:509:1)
+      at IncomingMessage.<anonymous> (node_modules/truffle/build/webpack:/~/xhr2/lib/xhr2.js:469:1)
+      at endReadableNT (_stream_readable.js:1064:12)
+      at _combinedTickCallback (internal/process/next_tick.js:139:11)
+      at process._tickCallback (internal/process/next_tick.js:181:9)
+
+  18) Contract: RootChain
+       7: Fork#0 Epoch#13 (testEpochsWithExitRequest)
+         should finalize requests:
+     Error: VM Exception while processing transaction: revert
+      at Object.InvalidResponse (node_modules/truffle/build/webpack:/~/web3/lib/web3/errors.js:38:1)
+      at node_modules/truffle/build/webpack:/~/web3/lib/web3/requestmanager.js:86:1
+      at node_modules/truffle/build/webpack:/packages/truffle-provider/wrapper.js:134:1
+      at XMLHttpRequest.request.onreadystatechange (node_modules/truffle/build/webpack:/~/web3/lib/web3/httpprovider.js:128:1)
+      at XMLHttpRequestEventTarget.dispatchEvent (node_modules/truffle/build/webpack:/~/xhr2/lib/xhr2.js:64:1)
+      at XMLHttpRequest._setReadyState (node_modules/truffle/build/webpack:/~/xhr2/lib/xhr2.js:354:1)
+      at XMLHttpRequest._onHttpResponseEnd (node_modules/truffle/build/webpack:/~/xhr2/lib/xhr2.js:509:1)
+      at IncomingMessage.<anonymous> (node_modules/truffle/build/webpack:/~/xhr2/lib/xhr2.js:469:1)
+      at endReadableNT (_stream_readable.js:1064:12)
+      at _combinedTickCallback (internal/process/next_tick.js:139:11)
+      at process._tickCallback (internal/process/next_tick.js:181:9)
+
+  19) Contract: RootChain
+       10: Fork#0 Epoch#19 (testEpochsWithInvalidExitRequest)
+         NRE#19: user can make an invalid exit request for token withdrawal:
+
+      AssertionError: expected false to equal true
+      + expected - actual
+
+      -false
+      +true
+      
+      at Context.it (test/RootChain.test.js:749:33)
+      at <anonymous>
+      at process._tickCallback (internal/process/next_tick.js:189:7)
+
+  20) Contract: RootChain
+       "before each" hook: before test:
+     Uncaught Error: VM Exception while processing transaction: revert
+      at Object.InvalidResponse (node_modules/truffle/build/webpack:/~/web3/lib/web3/errors.js:38:1)
+      at node_modules/truffle/build/webpack:/~/web3/lib/web3/requestmanager.js:86:1
+      at node_modules/truffle/build/webpack:/packages/truffle-provider/wrapper.js:134:1
+      at XMLHttpRequest.request.onreadystatechange (node_modules/truffle/build/webpack:/~/web3/lib/web3/httpprovider.js:128:1)
+      at XMLHttpRequestEventTarget.dispatchEvent (node_modules/truffle/build/webpack:/~/xhr2/lib/xhr2.js:64:1)
+      at XMLHttpRequest._setReadyState (node_modules/truffle/build/webpack:/~/xhr2/lib/xhr2.js:354:1)
+      at XMLHttpRequest._onHttpResponseEnd (node_modules/truffle/build/webpack:/~/xhr2/lib/xhr2.js:509:1)
+      at IncomingMessage.<anonymous> (node_modules/truffle/build/webpack:/~/xhr2/lib/xhr2.js:469:1)
+      at endReadableNT (_stream_readable.js:1064:12)
+      at _combinedTickCallback (internal/process/next_tick.js:139:11)
+      at process._tickCallback (internal/process/next_tick.js:181:9)
+
+
+

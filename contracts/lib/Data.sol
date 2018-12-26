@@ -148,7 +148,6 @@ library Data {
       preRB = _rbs[_pre.blocks[preBlockNumber].requestBlockId];
     }
 
-    // TODO: forked epoch == ORE 일 경우, 아닐경우 에 따라. 위 반복문에서 이미 커버 되나?
     _cur.nextBlockToRebase = uint64(preBlockNumber);
 
     return false;

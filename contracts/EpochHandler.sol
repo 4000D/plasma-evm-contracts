@@ -187,27 +187,41 @@ contract EpochHandler is RootChainStorage, RootChainEvent {
 
     if (epoch.isEmpty) {
       epoch.requestStart = previousRequestEpoch.requestEnd;
-
-      if (previousRequestEpoch.isEmpty) {
-        epoch.firstRequestBlockId = previousRequestEpoch.firstRequestBlockId;
-      } else {
-        epoch.firstRequestBlockId = previousRequestEpoch.firstRequestBlockId + uint64(previousRequestEpoch.getNumBlocks());
-      }
+      epoch.firstRequestBlockId = previousRequestEpoch.firstRequestBlockId;
     } else {
+      // TODO: check the first ORE after foreked.
+
       // if there is no filled ORB epoch, this is the first one
       if (firstFilledORBEpochNumber[currentFork] == 0) {
         firstFilledORBEpochNumber[currentFork] = fork.lastEpoch;
       } else {
-        // set requestStart, firstRequestBlockId based on previousRequestEpoch
-        if (previousRequestEpoch.isEmpty) {
-          epoch.requestStart = previousRequestEpoch.requestEnd;
-          epoch.firstRequestBlockId = previousRequestEpoch.firstRequestBlockId;
-        } else {
-          epoch.requestStart = previousRequestEpoch.requestEnd + 1;
-          epoch.firstRequestBlockId = previousRequestEpoch.firstRequestBlockId + uint64(previousRequestEpoch.getNumBlocks());
-        }
+        epoch.requestStart = previousRequestEpoch.requestEnd + 1;
+        epoch.firstRequestBlockId = previousRequestEpoch.firstRequestBlockId + uint64(previousRequestEpoch.getNumBlocks());
       }
     }
+    // if (epoch.isEmpty) {
+    //   epoch.requestStart = previousRequestEpoch.requestEnd;
+
+    //   if (previousRequestEpoch.isEmpty) {
+    //     epoch.firstRequestBlockId = previousRequestEpoch.firstRequestBlockId;
+    //   } else {
+    //     epoch.firstRequestBlockId = previousRequestEpoch.firstRequestBlockId + uint64(previousRequestEpoch.getNumBlocks());
+    //   }
+    // } else {
+    //   // if there is no filled ORB epoch, this is the first one
+    //   if (firstFilledORBEpochNumber[currentFork] == 0) {
+    //     firstFilledORBEpochNumber[currentFork] = fork.lastEpoch;
+    //   } else {
+    //     // set requestStart, firstRequestBlockId based on previousRequestEpoch
+    //     if (previousRequestEpoch.isEmpty) {
+    //       epoch.requestStart = previousRequestEpoch.requestEnd;
+    //       epoch.firstRequestBlockId = previousRequestEpoch.firstRequestBlockId;
+    //     } else {
+    //       epoch.requestStart = previousRequestEpoch.requestEnd + 1;
+    //       epoch.firstRequestBlockId = previousRequestEpoch.firstRequestBlockId + uint64(previousRequestEpoch.getNumBlocks());
+    //     }
+    //   }
+    // }
 
     // seal last ORB
     if (ORBs.length > 0) {
@@ -221,7 +235,7 @@ contract EpochHandler is RootChainStorage, RootChainEvent {
     require(currentFork == 0 || fork.rebased);
 
     fork.lastEpoch += 1;
-    Data.Epoch storage epoch = fork.epochs[fork.lastEpoch];
+    Data.Epoch storage curEpoch = fork.epochs[fork.lastEpoch];
 
     uint startBlockNumber = 1;
 
@@ -229,23 +243,23 @@ contract EpochHandler is RootChainStorage, RootChainEvent {
       startBlockNumber = fork.epochs[fork.lastEpoch - 1].endBlockNumber + 1;
     }
 
-    epoch.initialized = true;
-    epoch.timestamp = uint64(block.timestamp);
+    curEpoch.initialized = true;
+    curEpoch.timestamp = uint64(block.timestamp);
 
-    epoch.startBlockNumber = uint64(startBlockNumber);
-    epoch.endBlockNumber = uint64(startBlockNumber + NRELength - 1);
+    curEpoch.startBlockNumber = uint64(startBlockNumber);
+    curEpoch.endBlockNumber = uint64(startBlockNumber + NRELength - 1);
 
     emit EpochPrepared(
       currentFork,
       fork.lastEpoch,
-      epoch.startBlockNumber,
-      epoch.endBlockNumber,
+      curEpoch.startBlockNumber,
+      curEpoch.endBlockNumber,
       0,
       0,
       false,
       false,
       false,
-      epoch.rebase
+      curEpoch.rebase
     );
   }
 
@@ -253,6 +267,7 @@ contract EpochHandler is RootChainStorage, RootChainEvent {
     Data.Fork storage _f = forks[currentFork];
     bool isOREEmpty = _f.prepareOREAfterURE(forks[currentFork.sub(1)], ORBs, _getLatestRequestInfo);
     uint lastEpochNumber = _f.lastEpoch;
+    firstFilledORBEpochNumber[currentFork] = lastEpochNumber;
 
     emit EpochPrepared(
       currentFork,

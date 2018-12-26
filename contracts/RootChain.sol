@@ -460,6 +460,11 @@ contract RootChain is RootChainStorage, RootChainEvent {
     requestId = _rb.requestStart + _index;
     require(requestId <= _rb.requestEnd);
 
+    Data.Request storage r = _rs[requestId];
+
+    require(!r.challenged);
+    require(!r.finalized);
+
     bytes32 leaf = keccak256(_receiptData);
 
     require(_receiptData.toReceiptStatus() == 0);
@@ -467,7 +472,6 @@ contract RootChain is RootChainStorage, RootChainEvent {
       require(BMT.checkMembership(leaf, _index, _pb.receiptsRoot, _proof));
     }
 
-    Data.Request storage r = _rs[requestId];
     r.challenged = true;
 
     return;
@@ -692,6 +696,7 @@ contract RootChain is RootChainStorage, RootChainEvent {
     uint64,
     uint64,
     uint64,
+    uint64,
     bool,
     bool,
     bool,
@@ -706,6 +711,7 @@ contract RootChain is RootChainStorage, RootChainEvent {
       epoch.requestEnd,
       epoch.startBlockNumber,
       epoch.endBlockNumber,
+      epoch.firstRequestBlockId,
       epoch.numEnter,
       epoch.nextEnterEpoch,
       epoch.isEmpty,
@@ -717,6 +723,7 @@ contract RootChain is RootChainStorage, RootChainEvent {
   }
 
   function getLastEpoch() public view returns (
+    uint64,
     uint64,
     uint64,
     uint64,
@@ -737,6 +744,7 @@ contract RootChain is RootChainStorage, RootChainEvent {
       epoch.requestEnd,
       epoch.startBlockNumber,
       epoch.endBlockNumber,
+      epoch.firstRequestBlockId,
       epoch.numEnter,
       epoch.nextEnterEpoch,
       epoch.isEmpty,
@@ -910,7 +918,7 @@ contract RootChain is RootChainStorage, RootChainEvent {
     }
 
     Data.Fork storage fork = forks[currentFork];
-    uint blockNumber = fork.lastFinalizedBlock + 1;
+    uint blockNumber = Math.max(fork.firstBlock, fork.lastFinalizedBlock + 1);
 
     // short circuit if all blocks are submitted yet
     if (blockNumber > fork.lastBlock) {

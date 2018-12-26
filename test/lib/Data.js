@@ -33,6 +33,7 @@ class Epoch {
     requestEnd,
     startBlockNumber,
     endBlockNumber,
+    firstRequestBlockId,
     numEnter,
     nextEnterEpoch,
     isEmpty,
@@ -45,6 +46,7 @@ class Epoch {
     this.requestEnd = requestEnd;
     this.startBlockNumber = startBlockNumber;
     this.endBlockNumber = endBlockNumber;
+    this.firstRequestBlockId = firstRequestBlockId;
     this.numEnter = numEnter;
     this.nextEnterEpoch = nextEnterEpoch;
     this.isEmpty = isEmpty;
