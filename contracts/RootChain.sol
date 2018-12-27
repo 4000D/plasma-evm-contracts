@@ -690,20 +690,19 @@ contract RootChain is RootChainStorage, RootChainEvent {
     uint forkNumber,
     uint epochNumber
   ) public view returns (
-    uint64,
-    uint64,
-    uint64,
-    uint64,
-    uint64,
-    uint64,
-    uint64,
-    bool,
-    bool,
-    bool,
-    bool,
-    bool
+    uint64 requestStart,
+    uint64 requestEnd,
+    uint64 startBlockNumber,
+    uint64 endBlockNumber,
+    uint64 firstRequestBlockId,
+    uint64 numEnter,
+    bool isEmpty,
+    bool initialized,
+    bool isRequest,
+    bool userActivated,
+    bool rebase
   ) {
-    Data.Epoch storage epoch = forks[currentFork].epochs[epochNumber];
+    Data.Epoch storage epoch = forks[forkNumber].epochs[epochNumber];
 
     return
     (
@@ -713,7 +712,6 @@ contract RootChain is RootChainStorage, RootChainEvent {
       epoch.endBlockNumber,
       epoch.firstRequestBlockId,
       epoch.numEnter,
-      epoch.nextEnterEpoch,
       epoch.isEmpty,
       epoch.initialized,
       epoch.isRequest,
@@ -723,18 +721,17 @@ contract RootChain is RootChainStorage, RootChainEvent {
   }
 
   function getLastEpoch() public view returns (
-    uint64,
-    uint64,
-    uint64,
-    uint64,
-    uint64,
-    uint64,
-    uint64,
-    bool,
-    bool,
-    bool,
-    bool,
-    bool
+    uint64 requestStart,
+    uint64 requestEnd,
+    uint64 startBlockNumber,
+    uint64 endBlockNumber,
+    uint64 firstRequestBlockId,
+    uint64 numEnter,
+    bool isEmpty,
+    bool initialized,
+    bool isRequest,
+    bool userActivated,
+    bool rebase
   ) {
     Data.Epoch storage epoch = forks[currentFork].epochs[forks[currentFork].lastEpoch];
 
@@ -746,7 +743,6 @@ contract RootChain is RootChainStorage, RootChainEvent {
       epoch.endBlockNumber,
       epoch.firstRequestBlockId,
       epoch.numEnter,
-      epoch.nextEnterEpoch,
       epoch.isEmpty,
       epoch.initialized,
       epoch.isRequest,
@@ -890,7 +886,7 @@ contract RootChain is RootChainStorage, RootChainEvent {
    */
   function _prepareToSubmitORB() internal {
     // delegate to epoch handler
-    assert(epochHandler.delegatecall(bytes4(keccak256("_prepareToSubmitORB()"))));
+    require(epochHandler.delegatecall(bytes4(keccak256("_prepareToSubmitORB()"))));
   }
 
   function _prepareToSubmitNRB() internal {

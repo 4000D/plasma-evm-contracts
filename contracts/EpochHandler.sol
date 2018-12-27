@@ -169,8 +169,17 @@ contract EpochHandler is RootChainStorage, RootChainEvent {
       epoch.isEmpty = true;
       return;
     }
-    uint64 nextEpochNumber = fork.lastEpoch + 1;
     Data.Fork storage fork = forks[currentFork];
+    uint64 nextEpochNumber = fork.lastEpoch + 1;
+
+    // short curcit for ORE#2
+    if (nextEpochNumber - 2 == 0) {
+      if (ORBs.length > 0) {
+        ORBs[ORBs.length.sub(1)].submitted = true;
+      }
+      return;
+    }
+
     Data.Epoch storage previousRequestEpoch = fork.epochs[nextEpochNumber - 2];
 
     // if the epoch is the first ORE (not ORE') afeter forked
@@ -179,13 +188,10 @@ contract EpochHandler is RootChainStorage, RootChainEvent {
       previousRequestEpoch = fork.epochs[nextEpochNumber - 3];
     }
 
+    require(previousRequestEpoch.isRequest);
+
     if (EROs.length - 1 == uint(previousRequestEpoch.requestEnd)) {
       epoch.isEmpty = true;
-    }
-
-    // short circuit because epoch#0(previousRequestEpoch) is not a request epoch
-    if (currentFork == 2) {
-      return;
     }
 
     if (epoch.isEmpty) {

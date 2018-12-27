@@ -189,6 +189,8 @@ contract('RootChain', async ([
   async function checkEpoch (epochNumber) {
     const fork = new Data.Fork(await rootchain.forks(currentFork));
     const epoch1 = new Data.Epoch(await rootchain.getEpoch(currentFork, epochNumber));
+    const numBlocks1 = epoch1.requestEnd.sub(epoch1.requestStart).add(1).div(MAX_REQUESTS).ceil();
+
     // TODO: check block is included in the epoch const block = new Data.PlasmaBlock(await rootchain.getBlock(currentFork, fork.lastBlock));
 
     log(`
@@ -197,7 +199,6 @@ contract('RootChain', async ([
     // check # of blocks
     if (epoch1.isRequest && !epoch1.rebase) {
       log(`epoch1: ${JSON.stringify(epoch1)}`);
-      const numBlocks1 = epoch1.requestEnd.sub(epoch1.requestStart).add(1).div(MAX_REQUESTS).ceil();
       const numBlocks2 = epoch1.endBlockNumber.sub(epoch1.startBlockNumber).add(1);
       numBlocks2.should.be.bignumber.equal(numBlocks1);
     }
@@ -220,7 +221,7 @@ contract('RootChain', async ([
 
     } else if (epochNumber > 2 && epoch1.isRequest) { // later request epochs
       if (!epoch1.rebase) {
-        // check ORE
+        // TODO: check ORE
 
         // previous non request epoch
         const epoch2 = new Data.Epoch(await rootchain.getEpoch(currentFork, epochNumber - 1));
@@ -229,11 +230,15 @@ contract('RootChain', async ([
         const previousORENumber = currentFork !== 0 && fork.firstEpoch.add(4).eq(epochNumber)
           ? epochNumber - 3 : epochNumber - 2;
         const epoch3 = new Data.Epoch(await rootchain.getEpoch(currentFork, previousORENumber));
+        const numBlocks3 = epoch3.endBlockNumber.sub(epoch3.startBlockNumber).add(1);
+
+        const firstRequestBlockNumber = await rootchain.firstFilledORBEpochNumber(currentFork);
 
         log(`
         Epoch?
          - last: ${epochNumber}
          - previous requeast epoch: ${previousORENumber}
+         - firstRequestBlockNumber: ${firstRequestBlockNumber}
         `);
 
         epoch3.isRequest.should.be.equal(true);
@@ -244,26 +249,23 @@ contract('RootChain', async ([
 
           epoch1.requestStart.should.be.bignumber.equal(epoch3.requestEnd);
           epoch1.requestStart.should.be.bignumber.equal(epoch1.requestEnd);
+
+          epoch1.firstRequestBlockId.should.be.bignumber.equal(epoch3.firstRequestBlockId);
         } else {
           epoch1.startBlockNumber.should.be.bignumber.equal(epoch2.endBlockNumber.add(1));
           epoch1.requestEnd.should.be.bignumber.gt(epoch1.requestStart);
 
-          if (epoch3.requestEnd.eq(0)) {
-            epoch1.requestStart.should.be.bignumber.equal(epoch3.requestEnd);
+          if (firstRequestBlockNumber.cmp(epochNumber) === 0) {
+            // first ORE
+            epoch1.requestStart.should.be.bignumber.equal(0);
+            epoch1.firstRequestBlockId.should.be.bignumber.equal(0);
           } else {
             epoch1.requestStart.should.be.bignumber.equal(epoch3.requestEnd.add(1));
-          }
-
-          const previousNumBlocks = epoch3.endBlockNumber.sub(epoch3.startBlockNumber).add(1);
-
-          if (epoch3.isEmpty) {
-            epoch1.firstRequestBlockId.should.be.bignumber.equal(epoch3.firstRequestBlockId.add(1));
-          } else {
-            epoch1.firstRequestBlockId.should.be.bignumber.equal(epoch3.firstRequestBlockId.add(previousNumBlocks));
+            epoch1.firstRequestBlockId.should.be.bignumber.equal(epoch3.firstRequestBlockId.add(numBlocks3));
           }
         }
       } else {
-        // check ORE'
+        // TODO: check ORE'
 
         // previous URE
         const epoch2 = new Data.Epoch(await rootchain.getEpoch(currentFork, epochNumber - 1));
@@ -309,10 +311,12 @@ contract('RootChain', async ([
 
   async function checkRequestBlock (blockNumber) {
     const block = new Data.PlasmaBlock(await rootchain.getBlock(currentFork, blockNumber));
-    const epoch = new Data.PlasmaBlock(await rootchain.getEpoch(currentFork, block.epochNumber));
+    const epoch = new Data.Epoch(await rootchain.getEpoch(currentFork, block.epochNumber));
+    const requestBlock = new Data.RequestBlock(await rootchain.ORBs(block.requestBlockId));
 
     await logEpoch(currentFork, block.epochNumber);
     await logBlock(currentFork, blockNumber);
+    log(`      RequestBlock${block.requestBlockId} ${JSON.stringify(requestBlock)}`);
 
     block.isRequest.should.be.equal(true);
     epoch.isRequest.should.be.equal(true);
@@ -322,7 +326,6 @@ contract('RootChain', async ([
     block.requestBlockId.should.be.bignumber.gte(epoch.firstRequestBlockId);
     block.requestBlockId.should.be.bignumber.lt(epoch.firstRequestBlockId.add(numBlocks));
 
-    const requestBlock = new Data.RequestBlock(await rootchain.ORBs(block.requestBlockId));
     epoch.requestStart.should.be.bignumber.lte(requestBlock.requestStart);
     epoch.requestEnd.should.be.bignumber.gte(requestBlock.requestEnd);
   }
@@ -360,10 +363,9 @@ contract('RootChain', async ([
       await checkLastBlockNumber();
 
       await rootchain.submitORB(currentFork, statesRoot, transactionsRoot, receiptsRoot, { value: COST_ORB });
-      await checkRequestBlock(forks[currentFork].lastBlock);
-
       forks[currentFork].lastBlock += 1;
 
+      await checkRequestBlock(forks[currentFork].lastBlock);
       await checkLastBlockNumber();
     }
   }
@@ -478,7 +480,7 @@ contract('RootChain', async ([
     const ORBEPochNumber = NRBEPochNumber + 1;
 
     before(`check NRE#${NRBEPochNumber} parameters`, async () => {
-      const isRequest = false;
+      const isRequest = NRBEPochNumber !== 1;
       const userActivated = false;
 
       log(`
@@ -505,7 +507,7 @@ contract('RootChain', async ([
       await logEpochAndBlock(currentFork, forks[currentFork].lastEpoch + 2);
 
       // because no ERO, ORB epoch is empty
-      const isRequest = false;
+      const isRequest = true;
       const userActivated = false;
 
       forks[currentFork].lastEpoch += 2;
@@ -523,7 +525,7 @@ contract('RootChain', async ([
     const ORBEPochNumber = NRBEPochNumber + 1;
 
     before(`check NRE#${NRBEPochNumber} parameters`, async () => {
-      const isRequest = false;
+      const isRequest = NRBEPochNumber !== 1;
       const userActivated = false;
 
       await checkEpoch(forks[currentFork].lastEpoch);
@@ -588,7 +590,7 @@ contract('RootChain', async ([
       await submitDummyNRBs(NRELength);
       await logEpochAndBlock(currentFork, forks[currentFork].lastEpoch);
 
-      const isRequest = true;
+      const isRequest = false;
       const userActivated = false;
 
       forks[currentFork].lastEpoch += 1;
@@ -608,13 +610,11 @@ contract('RootChain', async ([
       forks[currentFork].lastEpoch += 1;
       await checkEpoch(forks[currentFork].lastEpoch);
 
-      await checkLastEpoch(isRequest, userActivated);
-      await checkLastEpochNumber();
-
-      const isRequest = false;
+      const isRequest = true;
       const userActivated = false;
 
       await checkLastEpoch(isRequest, userActivated);
+      await checkLastEpochNumber();
     });
 
     it('can finalize blocks', finalizeBlocks);
@@ -630,6 +630,15 @@ contract('RootChain', async ([
         Epoch#${forks[currentFork].lastEpoch - 1} ${await rootchain.getEpoch(currentFork, forks[currentFork].lastEpoch - 1)}
         Epoch#${forks[currentFork].lastEpoch} ${await rootchain.getEpoch(currentFork, forks[currentFork].lastEpoch)}
         `);
+
+      const isRequest = NRBEPochNumber !== 1;
+      const userActivated = false;
+
+      await checkEpoch(forks[currentFork].lastEpoch);
+      await checkLastEpoch(isRequest, userActivated);
+
+      await checkLastBlockNumber();
+      await checkLastEpochNumber();
     });
 
     it(`NRE#${NRBEPochNumber}: user can make an exit request for token withdrawal`, async () => {
@@ -650,7 +659,7 @@ contract('RootChain', async ([
     });
 
     it(`NRE#${NRBEPochNumber}: operator submits NRBs`, async () => {
-      const isRequest = true;
+      const isRequest = false;
       const userActivated = false;
 
       await submitDummyNRBs(NRELength);
@@ -663,7 +672,7 @@ contract('RootChain', async ([
     });
 
     it(`ORE#${ORBEPochNumber}: operator submits ORBs`, async () => {
-      const isRequest = false;
+      const isRequest = true;
       const userActivated = false;
 
       const epoch = new Data.Epoch(await rootchain.getEpoch(currentFork, ORBEPochNumber));
@@ -712,7 +721,7 @@ contract('RootChain', async ([
     });
 
     it(`NRE#${NRBEPochNumber}: operator submits NRBs`, async () => {
-      const isRequest = true;
+      const isRequest = false;
       const userActivated = false;
 
       await submitDummyNRBs(NRELength);
@@ -725,7 +734,7 @@ contract('RootChain', async ([
     });
 
     it(`ORE#${ORBEPochNumber}: operator submits ORBs`, async () => {
-      const isRequest = false;
+      const isRequest = true;
       const userActivated = false;
 
       const epoch = new Data.Epoch(await rootchain.getEpoch(currentFork, ORBEPochNumber));
@@ -929,19 +938,21 @@ contract('RootChain', async ([
     // testEpochsWithRequest,
 
     testEpochsWithoutRequest,
-    testEpochsWithInvalidExitRequest,
-
-    testEpochsWithoutRequest,
     testEpochsWithRequest,
-    // makeUAFTest({
-    //   numNREs: 1,
-    //   numOREs: 1,
-    //   makeEnter: true,
-    //   makeExit: true,
-    // }),
+    testEpochsWithInvalidExitRequest,
+    // testEpochsWithInvalidExitRequest,
+
     // testEpochsWithoutRequest,
-    // testEpochsWithInvalidExitRequest,
-    // testEpochsWithInvalidExitRequest,
+    // testEpochsWithRequest,
+    // // makeUAFTest({
+    // //   numNREs: 1,
+    // //   numOREs: 1,
+    // //   makeEnter: true,
+    // //   makeExit: true,
+    // // }),
+    // // testEpochsWithoutRequest,
+    // // testEpochsWithInvalidExitRequest,
+    // // testEpochsWithInvalidExitRequest,
 
     testEpochsWithExitRequest,
     testEpochsWithRequest,
