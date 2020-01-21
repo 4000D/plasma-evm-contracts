@@ -10,8 +10,11 @@ import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/Reentranc
 
 import { DSMath } from "coinage-token/contracts/lib/DSMath.sol";
 
+import { SeigManagerI } from "./SeigManagerI.sol";
+import { SeigToken } from "./SeigToken.sol";
 
-contract WTON is DSMath, Ownable, ReentrancyGuard, ERC20Mintable, ERC20Detailed {
+
+contract WTON is DSMath, Ownable, ReentrancyGuard, ERC20Mintable, ERC20Detailed, SeigToken {
   using SafeERC20 for IERC20;
 
   IERC20 public ton;
@@ -26,9 +29,9 @@ contract WTON is DSMath, Ownable, ReentrancyGuard, ERC20Mintable, ERC20Detailed 
     ton = _ton;
   }
 
-  function mint(address, uint256) public returns (bool) {
-    revert("WTON: minting token is not allowed");
-  }
+  // function mint(address, uint256) public returns (bool) {
+  //   revert("WTON: minting token is not allowed");
+  // }
 
   /**
    * @dev swap WTON to TON

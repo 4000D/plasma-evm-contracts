@@ -19,23 +19,28 @@ import { DepositManager } from "./DepositManager.sol";
  * For each commit by operator, operator (or user) will get seigniorage
  * in propotion to the staked (or delegated) amount of WTON.
  *
- * {tot} tracks total staked or delegated WTON of each RootChain contract.
- * {coinages[rootchain]} tracks staked or delegated WTON of user or operator to a RootChain contract.
+ * [Tokens]
+ * - {tot} tracks total staked or delegated WTON of each RootChain contract (and depositor?).
+ * - {coinages[rootchain]} tracks staked or delegated WTON of user or operator to a RootChain contract.
+ * - {comitted} tracks balance of {tot} to capture of balance of {tot} when the operator commits.
  *
  * For each commit by operator,
  *  1. increases all root chains' balance of {tot} by (the staked amount of WTON) /
  *     (total supply of TON and WTON) * (num blocks * seigniorage per block).
  *  2. increases all depositors' blanace of {coinages[rootchain]} in proportion to the staked amount of WTON,
  *     up to the increased amount in step (1).
+ *  3. set the root chain's balance of {committed} as the root chain's {tot} balance.
  *
  * For each stake or delegate with amount of {v} to a RootChain,
  *  1. mint {v} {coinages[rootchain]} tokens to the depositor
  *  2. mint {v} {tot} tokens to the root chain contract
+ *  3. add {committed[rootchain]} by {v}
  *
  * For each unstake or undelegate (or get rewards) with amount of {v} to a RootChain,
  *  1. burn {v} {coinages[rootchain]} tokens to the depositor
  *  2. burn {v + ⍺} {tot} tokens to the root chain contract,
- *   where ⍺ = tot.seigPerBlock() * num blocks * v / tot.balanceOf(rootchain)
+ *   where ⍺ = SEG_PER_BLOCK * num blocks * v / coinages[rootchain].totalSupply()
+ *  3. subtract {committed[rootchain]} by {v}
  *
  */
 contract SeigManager  is DSMath, Ownable {
@@ -66,6 +71,9 @@ contract SeigManager  is DSMath, Ownable {
   // coinage token for each root chain.
   mapping (address => CustomIncrementCoinage) public coinages;
 
+  // captured tot balance of the root chain on comitted.
+  mapping (address => uint256) comitted;
+
   // last commit block number for each root chain.
   mapping (address => uint256) public lastCommitBlock;
 
@@ -74,7 +82,6 @@ contract SeigManager  is DSMath, Ownable {
 
   // the block number when seigniorages are given
   uint256 public lastSeigBlock;
-
 
   //////////////////////////////
   // Constants
@@ -95,7 +102,6 @@ contract SeigManager  is DSMath, Ownable {
     require(msg.sender == address(depositManager));
     _;
   }
-
 
   modifier onlyRootChain(address rootchain) {
     require(registry.rootchains(rootchain));
@@ -144,6 +150,7 @@ contract SeigManager  is DSMath, Ownable {
   // External functions
   //////////////////////////////
 
+
   /**
    * @dev deploy coinage token for the root chain.
    */
@@ -168,60 +175,46 @@ contract SeigManager  is DSMath, Ownable {
     return true;
   }
 
+  event SeigGiven(address rootchain, uint256 totalSeig, uint256 stakedSeig, uint256 unstakedSeig);
+  event Comitted(address rootchain);
+  event CommitLog1(uint256 totalStakedAmount, uint256 totalSupplyOfWTON, uint256 prevTotalSupply, uint256 nextTotalSupply);
+
   /**
    * @dev A proxy function for a new commit
    */
-  function onCommit(address rootchain)
+  function onCommit()
     external
-    onlyDepositManager
-    checkCoinage(rootchain)
+    checkCoinage(msg.sender)
     returns (bool)
   {
-    uint256 prevTotalSupply;
-    uint256 nextTotalSupply;
-
-    // 1. increase total supply of {tot} by seigniorages * (total staked amount of WTON / total supply of TON and WTON)
-
-    prevTotalSupply = tot.totalSupply();
-
-    // maximum seigniorages
-    uint256 totalSeig = (block.number - lastSeigBlock) * seigPerBlock;
-
-    uint256 seig = (
-      rdiv(
-        rmul(
-          totalSeig,
-          // total staked amount of WTON
-          wton.balanceOf(address(depositManager)).sub(depositManager.pendingWithdrawalAmount())
-        ),
-        // total supply of WTON and TON
-        wton.totalSupply().add(ton.totalSupply())
-      )
-    );
-
-    nextTotalSupply = prevTotalSupply.add(seig);
-
-    tot.setFactor(
-      rdiv(
-        nextTotalSupply,
-        prevTotalSupply
-      )
-    );
-
-    lastSeigBlock = block.number;
+    _increaseTot();
 
     // 2. increase total supply of {coinages[rootchain]}
-    CustomIncrementCoinage coinage = coinages[rootchain];
+    CustomIncrementCoinage coinage = coinages[msg.sender];
 
-    prevTotalSupply = coinage.totalSupply();
-    nextTotalSupply = tot.balanceOf(rootchain);
+    uint256 prevTotalSupply = coinage.totalSupply();
+    uint256 nextTotalSupply = tot.balanceOf(msg.sender);
 
-    coinage.setFactor(rdiv(nextTotalSupply, prevTotalSupply));
+    coinage.setFactor(_calcNewFactor(prevTotalSupply, nextTotalSupply, coinage.factor()));
 
     // gives seigniorages to the root chain as coinage
 
-    lastCommitBlock[rootchain] = block.number;
+    lastCommitBlock[msg.sender] = block.number;
+    comitted[msg.sender] = tot.balanceOf(msg.sender);
     wton.mint(address(this), nextTotalSupply.sub(prevTotalSupply));
+
+    // emit events
+    emit Comitted(msg.sender);
+
+    return true;
+  }
+
+  /**
+   * @dev A proxy function for a token transfer
+   */
+  function onTransfer(address sender, address recipient, uint256 amount) external returns (bool) {
+    require(msg.sender == address(ton) || msg.sender == address(wton), "SeigManager: only TON or WTON can call onTransfer");
+    _increaseTot();
     return true;
   }
 
@@ -288,5 +281,79 @@ contract SeigManager  is DSMath, Ownable {
   function _getStakeStats() internal returns (uint256 stakedAmount, uint256 unstakedAmount) {
     stakedAmount = wton.balanceOf(address(depositManager));
     unstakedAmount = wton.totalSupply().sub(stakedAmount);
+  }
+
+  function _calcNewFactor(uint256 source, uint256 target, uint256 oldFactor) internal pure returns (uint256) {
+    return rdiv(rmul(target, oldFactor), source);
+  }
+
+  function _increaseTot() internal returns (bool) {
+    // short circuit if already seigniorage is given.
+    if (block.number == lastSeigBlock) {
+      return false;
+    }
+
+    if (tot.totalSupply() == 0) {
+      lastSeigBlock = block.number;
+      return false;
+    }
+
+    uint256 prevTotalSupply;
+    uint256 nextTotalSupply;
+
+    uint256 totalPendingWithdrawalAmount = depositManager.totalPendingWithdrawalAmount();
+    uint256 pendingWithdrawalAmount = depositManager.pendingWithdrawalAmount(msg.sender);
+
+    // 1. increase total supply of {tot} by maximum seigniorages * staked rate
+    //    staked rate = total staked amount / total supply of (W)TON
+
+    prevTotalSupply = tot.totalSupply();
+
+    // maximum seigniorages
+    uint256 maxSeig = (block.number - lastSeigBlock).mul(seigPerBlock);
+
+    // maximum seigniorages * staked rate
+    uint256 stakedSeig = rdiv(
+      rmul(
+        maxSeig,
+        // total staked amount
+        tot.totalSupply().sub(totalPendingWithdrawalAmount)
+      ),
+      // total supply of (W)TON
+      ton.totalSupply()
+        .sub(ton.balanceOf(address(wton)))
+        .mul(10 ** 9)                                   // convert TON total supply into ray
+        .add(wton.totalSupply())                        // add WTON total supply
+        .add(tot.totalSupply()).sub(wton.totalSupply()) // consider additional TOT balance as total supply
+    );
+
+    nextTotalSupply = prevTotalSupply.add(stakedSeig);
+    lastSeigBlock = block.number;
+
+    tot.setFactor(_calcNewFactor(prevTotalSupply, nextTotalSupply, tot.factor()));
+
+
+    emit CommitLog1(
+      // total staked amount
+      tot.totalSupply().sub(totalPendingWithdrawalAmount),
+
+      // total supply of (W)TON
+      ton.totalSupply()
+        .sub(ton.balanceOf(address(wton)))
+        .mul(10 ** 9)                                   // convert TON total supply into ray
+        .add(wton.totalSupply())                        // add WTON total supply
+        .add(tot.totalSupply()).sub(wton.totalSupply()), // consider additional TOT balance as total supply
+
+      prevTotalSupply,
+      nextTotalSupply
+    );
+
+
+    // TODO: give unstaked amount to jackpot
+    uint256 unstakedSeig = maxSeig.sub(stakedSeig);
+
+    emit SeigGiven(msg.sender, maxSeig, stakedSeig, unstakedSeig);
+
+    return true;
   }
 }

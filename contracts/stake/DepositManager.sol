@@ -13,9 +13,6 @@ import { SeigManager } from "./SeigManager.sol";
 
 /**
  * @dev DepositManager manages WTON deposit and withdrawal from operator and WTON holders.
- *
- * 1. 출금 요청을 보낸 N일 후에 수령 ~~ operator 들에겐 반드시 이 옵션
- * 2. 입금 N일 이후 즉시 출금 가능 ~~ delegator 에겐 이정도는 허용 해 줘야 하는데
  */
 contract DepositManager is Ownable {
   using SafeMath for uint256;
@@ -34,7 +31,8 @@ contract DepositManager is Ownable {
   // rootchain => msg.sender => index
   mapping (address => mapping (address => uint256)) public withdrawalRequestIndex;
 
-  uint256 public pendingWithdrawalAmount;
+  uint256 public totalPendingWithdrawalAmount;
+  mapping (address => uint256) public pendingWithdrawalAmount;
 
   // withdrawal delay in block number
   // @TODO: change delay unit to CYCLE?
@@ -102,7 +100,8 @@ contract DepositManager is Ownable {
       processed: false
     }));
 
-    pendingWithdrawalAmount = pendingWithdrawalAmount.add(amount);
+    totalPendingWithdrawalAmount = totalPendingWithdrawalAmount.add(amount);
+    pendingWithdrawalAmount[rootchain] = pendingWithdrawalAmount[rootchain].add(amount);
 
     emit WithdrawalRequested(rootchain, msg.sender, amount);
   }
@@ -117,7 +116,9 @@ contract DepositManager is Ownable {
     r.processed = true;
 
     withdrawalRequestIndex[rootchain][msg.sender] += 1;
-    pendingWithdrawalAmount = pendingWithdrawalAmount.sub(r.amount);
+
+    totalPendingWithdrawalAmount = totalPendingWithdrawalAmount.sub(r.amount);
+    pendingWithdrawalAmount[rootchain] = pendingWithdrawalAmount[rootchain].sub(r.amount);
 
     wton.safeTransfer(msg.sender, r.amount);
 
