@@ -12,17 +12,20 @@ import { SeigManager } from "./SeigManager.sol";
 // TODO: add events
 
 /**
- * @dev DepositManager manages TON deposit and withdrawal from operator and TON holders.
+ * @dev DepositManager manages WTON deposit and withdrawal from operator and WTON holders.
+ *
+ * 1. 출금 요청을 보낸 N일 후에 수령 ~~ operator 들에겐 반드시 이 옵션
+ * 2. 입금 N일 이후 즉시 출금 가능 ~~ delegator 에겐 이정도는 허용 해 줘야 하는데
  */
 contract DepositManager is Ownable {
   using SafeMath for uint256;
   using SafeERC20 for IERC20;
 
-  IERC20 public ton;
+  IERC20 public wton;
   RootChainRegistry public registry;
   SeigManager public seigManager;
 
-  // rootchian => msg.sender => ton amount
+  // rootchian => msg.sender => wton amount
   mapping (address => mapping (address => uint256)) public deposits;
 
   // rootchain => msg.sender => withdrawal requests
@@ -31,12 +34,14 @@ contract DepositManager is Ownable {
   // rootchain => msg.sender => index
   mapping (address => mapping (address => uint256)) public withdrawalRequestIndex;
 
-  // withdrawal delay in unix timestamp
+  uint256 public pendingWithdrawalAmount;
+
+  // withdrawal delay in block number
   // @TODO: change delay unit to CYCLE?
   uint256 public WITHDRAWAL_DELAY;
 
   struct WithdrawalReqeust {
-    uint128 withdrawableAt;
+    uint128 withdrawableBlockNumber;
     uint128 amount;
     bool processed;
   }
@@ -46,50 +51,98 @@ contract DepositManager is Ownable {
     _;
   }
 
+  modifier onlySeigManager() {
+    require(msg.sender == address(seigManager));
+    _;
+  }
+
+  ////////////////////
+  // Events
+  ////////////////////
+  event Deposited(address indexed rootchain, address depositor, uint256 amount);
+  event WithdrawalRequested(address indexed rootchain, address depositor, uint256 amount);
+  event WithdrawalProcessed(address indexed rootchain, address depositor, uint256 amount);
+
   constructor (
-    IERC20 _ton,
+    IERC20 _wton,
     RootChainRegistry _registry,
     uint256 _WITHDRAWAL_DELAY
   ) public {
-    ton = _ton;
+    wton = _wton;
     registry = _registry;
     WITHDRAWAL_DELAY = _WITHDRAWAL_DELAY;
   }
 
   function setSeigManager(SeigManager _seigManager) external onlyOwner {
+    require(address(seigManager) == address(0), "DepositManager: SeigManager is already set");
     seigManager = _seigManager;
   }
 
-  function deposit(address rootchain, uint256 amount) external onlyRootChain(rootchain) returns (bool) {
+  /**
+   * @dev deposit `amount` WTON in RAY
+   */
+  function deposit(address rootchain, uint256 amount) public onlyRootChain(rootchain) returns (bool) {
     deposits[rootchain][msg.sender] = deposits[rootchain][msg.sender].add(amount);
 
-    ton.safeTransferFrom(msg.sender, address(this), amount);
+    wton.safeTransferFrom(msg.sender, address(this), amount);
+
+    emit Deposited(rootchain, msg.sender, amount);
+
+    require(seigManager.onStake(rootchain, msg.sender, amount));
 
     return true;
   }
 
-  function requestWithdrawal(address rootchain, uint256 amount) external onlyRootChain(rootchain) returns (bool) {
+  function requestWithdrawal(address rootchain, uint256 amount) public onlyRootChain(rootchain) returns (bool) {
     deposits[rootchain][msg.sender] = deposits[rootchain][msg.sender].sub(amount);
 
     withdrawalReqeusts[rootchain][msg.sender].push(WithdrawalReqeust({
-      withdrawableAt: uint128(block.timestamp + WITHDRAWAL_DELAY),
+      withdrawableBlockNumber: uint128(block.number + WITHDRAWAL_DELAY),
       amount: uint128(amount),
       processed: false
     }));
+
+    pendingWithdrawalAmount = pendingWithdrawalAmount.add(amount);
+
+    emit WithdrawalRequested(rootchain, msg.sender, amount);
   }
 
   function processRequest(address rootchain) public {
     uint256 index = withdrawalRequestIndex[rootchain][msg.sender];
+    require(withdrawalReqeusts[rootchain][msg.sender].length > index, "DepositManager: no request to process");
 
     WithdrawalReqeust storage r = withdrawalReqeusts[rootchain][msg.sender][index];
 
-    require(r.withdrawableAt >= block.timestamp);
+    require(r.withdrawableBlockNumber <= block.number, "DepositManager: wait for withdrawal delay");
     r.processed = true;
 
     withdrawalRequestIndex[rootchain][msg.sender] += 1;
+    pendingWithdrawalAmount = pendingWithdrawalAmount.sub(r.amount);
 
-    ton.safeTransfer(msg.sender, r.amount);
+    wton.safeTransfer(msg.sender, r.amount);
+
+    emit WithdrawalProcessed(rootchain, msg.sender, r.amount);
   }
+
+  /**
+   * @dev unstake or claim rewards
+   */
+  function unstake(address rootchain, uint256 amount) public onlyRootChain(rootchain) returns (bool) {
+    require(seigManager.onUnstake(rootchain, msg.sender, amount));
+
+    deposits[rootchain][msg.sender] = deposits[rootchain][msg.sender].add(amount);
+    return true;
+  }
+
+  function unstakeAll(address rootchain) external onlyRootChain(rootchain) returns (bool) {
+    uint256 amount;
+
+    // TODO: calculate unstakable amount
+
+    unstake(rootchain, amount);
+    return true;
+  }
+
 
   function processRequests(address rootchain, uint256 n) external {
     for (uint256 i = 0; i < n; i++) {
