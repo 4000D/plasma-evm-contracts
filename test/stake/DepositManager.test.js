@@ -88,6 +88,7 @@ describe('stake/DepositManager', function () {
       });
     });
 
+    // TODO: amount check
     describe('after the token owner deposits tokens', function () {
       beforeEach(async function () {
         await this.depositManager.deposit(this.rootchain.address, tokenAmount.toFixed('ray'), { from: tokenOwner });

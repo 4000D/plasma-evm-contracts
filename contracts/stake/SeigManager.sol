@@ -22,7 +22,6 @@ import { DepositManager } from "./DepositManager.sol";
  * [Tokens]
  * - {tot} tracks total staked or delegated WTON of each RootChain contract (and depositor?).
  * - {coinages[rootchain]} tracks staked or delegated WTON of user or operator to a RootChain contract.
- * - {comitted} tracks balance of {tot} to capture of balance of {tot} when the operator commits.
  *
  * For each commit by operator,
  *  1. increases all root chains' balance of {tot} by (the staked amount of WTON) /
@@ -34,13 +33,14 @@ import { DepositManager } from "./DepositManager.sol";
  * For each stake or delegate with amount of {v} to a RootChain,
  *  1. mint {v} {coinages[rootchain]} tokens to the depositor
  *  2. mint {v} {tot} tokens to the root chain contract
- *  3. add {committed[rootchain]} by {v}
  *
  * For each unstake or undelegate (or get rewards) with amount of {v} to a RootChain,
- *  1. burn {v} {coinages[rootchain]} tokens to the depositor
- *  2. burn {v + ⍺} {tot} tokens to the root chain contract,
- *   where ⍺ = SEG_PER_BLOCK * num blocks * v / coinages[rootchain].totalSupply()
- *  3. subtract {committed[rootchain]} by {v}
+ *  1. burn {v} {coinages[rootchain]} tokens from the depositor
+ *  2. burn {v + ⍺} {tot} tokens from the root chain contract,
+ *   where ⍺ = SEIGS * staked ratio of the root chian * withdrawal ratio of the depositor
+ *     - SEIGS                              = tot total supply - tot total supply at last commit from the root chain
+ *     - staked ratio of the root chian     = tot balance of the root chain / tot total supply
+ *     - withdrawal ratio of the depositor  = amount to withdraw / total supply of coinage
  *
  */
 contract SeigManager  is DSMath, Ownable {
@@ -64,15 +64,11 @@ contract SeigManager  is DSMath, Ownable {
   // WTON token contract
   ERC20Mintable public wton; // TODO: use mintable erc20!
 
-  // TODO: fixed seig? 스테이크된 양에 비례해서!
   // track total deposits of each root chain.
   CustomIncrementCoinage public tot;
 
   // coinage token for each root chain.
   mapping (address => CustomIncrementCoinage) public coinages;
-
-  // captured tot balance of the root chain on comitted.
-  mapping (address => uint256) comitted;
 
   // last commit block number for each root chain.
   mapping (address => uint256) public lastCommitBlock;
@@ -82,6 +78,8 @@ contract SeigManager  is DSMath, Ownable {
 
   // the block number when seigniorages are given
   uint256 public lastSeigBlock;
+
+  mapping (address => uint256) totTotalSupplyAtCommit;
 
   //////////////////////////////
   // Constants
@@ -169,6 +167,7 @@ contract SeigManager  is DSMath, Ownable {
         false
       );
       lastCommitBlock[rootchain] = block.number;
+      totTotalSupplyAtCommit[rootchain] = tot.totalSupply();
       emit CoinageCreated(rootchain, address(coinages[rootchain]));
     }
 
@@ -177,6 +176,8 @@ contract SeigManager  is DSMath, Ownable {
 
   event SeigGiven(address rootchain, uint256 totalSeig, uint256 stakedSeig, uint256 unstakedSeig);
   event Comitted(address rootchain);
+
+  // test log...
   event CommitLog1(uint256 totalStakedAmount, uint256 totalSupplyOfWTON, uint256 prevTotalSupply, uint256 nextTotalSupply);
 
   /**
@@ -200,7 +201,8 @@ contract SeigManager  is DSMath, Ownable {
     // gives seigniorages to the root chain as coinage
 
     lastCommitBlock[msg.sender] = block.number;
-    comitted[msg.sender] = tot.balanceOf(msg.sender);
+    totTotalSupplyAtCommit[msg.sender] = tot.totalSupply();
+
     wton.mint(address(this), nextTotalSupply.sub(prevTotalSupply));
 
     // emit events
@@ -232,22 +234,52 @@ contract SeigManager  is DSMath, Ownable {
     return true;
   }
 
+  event UnstakeLog(uint coinageBurnAmount, uint totBurnAmount);
+
   function onUnstake(address rootchain, address depositor, uint256 amount)
     public
     onlyDepositManager
     checkCoinage(rootchain)
     returns (bool)
   {
-    uint256 totAmount = seigPerBlock
-      .mul(block.number - lastCommitBlock[rootchain])
-      .mul(rdiv(amount, tot.balanceOf(rootchain)));
-    totAmount = totAmount.add(amount);
+    require(coinages[rootchain].balanceOf(depositor) >= amount, "SeigManager: insufficiant balance to unstake");
 
+    // burn {v + ⍺} {tot} tokens to the root chain contract,
+    uint256 totAmount = additionalTotBurnAmount(rootchain, depositor, amount);
+    tot.burnFrom(rootchain, amount.add(totAmount));
+
+    // burn {v} {coinages[rootchain]} tokens to the depositor
     coinages[rootchain].burnFrom(depositor, amount);
-    tot.burnFrom(rootchain, totAmount);
 
-    wton.safeTransfer(address(depositManager), amount);
+    emit UnstakeLog(amount, totAmount);
+
     return true;
+  }
+
+  // return ⍺, where ⍺ = SEIGS * staked ratio of the root chian * withdrawal ratio of the depositor
+  //   - SEIGS                              = tot total supply - tot total supply at last commit from the root chain
+  //   - staked ratio of the root chian     = tot balance of the root chain / tot total supply
+  //   - withdrawal ratio of the depositor  = amount to withdraw / total supply of coinage
+  function additionalTotBurnAmount(address rootchain, address depositor, uint256 amount)
+    public
+    view
+    returns (uint256 totAmount)
+  {
+    uint256 prevTotTotalSupply = totTotalSupplyAtCommit[rootchain];
+
+    totAmount = rdiv(
+      rdiv(
+        rmul(
+          rmul(
+            tot.totalSupply().sub(prevTotTotalSupply),  // `SEIGS`
+            amount                                      // times `amount to withdraw`
+          ),
+          tot.balanceOf(rootchain)                      // times `tot balance of the root chain`
+        ),
+        coinages[rootchain].totalSupply()               // div `total supply of coinage`
+      ),
+      tot.totalSupply()                                 // div `tot total supply`
+    );
   }
 
   //////////////////////////////
@@ -293,9 +325,6 @@ contract SeigManager  is DSMath, Ownable {
     uint256 prevTotalSupply;
     uint256 nextTotalSupply;
 
-    uint256 totalPendingWithdrawalAmount = depositManager.totalPendingWithdrawalAmount();
-    uint256 pendingWithdrawalAmount = depositManager.pendingWithdrawalAmount(msg.sender);
-
     // 1. increase total supply of {tot} by maximum seigniorages * staked rate
     //    staked rate = total staked amount / total supply of (W)TON
 
@@ -309,7 +338,7 @@ contract SeigManager  is DSMath, Ownable {
       rmul(
         maxSeig,
         // total staked amount
-        tot.totalSupply().sub(totalPendingWithdrawalAmount)
+        tot.totalSupply()
       ),
       // total supply of (W)TON
       ton.totalSupply()
@@ -327,7 +356,7 @@ contract SeigManager  is DSMath, Ownable {
 
     emit CommitLog1(
       // total staked amount
-      tot.totalSupply().sub(totalPendingWithdrawalAmount),
+      tot.totalSupply(),
 
       // total supply of (W)TON
       ton.totalSupply()

@@ -398,33 +398,106 @@ describe.only('stake/SeigManager', function () {
               );
             });
 
-            it(`${i}-th root chain: the tokwn owner should claim staked amount`, async function () {
+            it.only(`${i}-th root chain: the tokwn owner should claim staked amount`, async function () {
               const rootchain = this.rootchains[i];
+              const coinage = this.coinagesByRootChain[rootchain.address];
 
+              const precomitted = toBN(
+                (
+                  this.seigs.slice(i + 1).length > 0
+                    ? this.seigs.slice(i + 1).reduce((a, b) => a.plus(b)).div(NUM_ROOTCHAINS)
+                    : _WTON('0')
+                ).toFixed(WTON_UNIT),
+              );
               const amount = await this.seigManager.stakeOf(rootchain.address, tokenOwner);
+              const additionalTotBurnAmount = await this.seigManager.additionalTotBurnAmount(rootchain.address, tokenOwner, amount);
+
+              console.log(`
+              amount                     ${amount.toString(10).padStart(30)}
+              precomitted                ${precomitted.toString(10).padStart(30)}
+              additionalTotBurnAmount    ${additionalTotBurnAmount.toString(10).padStart(30)}
+              `);
+
+              const prevWTONBalance = await this.wton.balanceOf(tokenOwner);
+              const prevCoinageTotalSupply = await coinage.totalSupply();
+              const prevCoinageBalance = await coinage.balanceOf(tokenOwner);
+              const prevTotTotalSupply = await this.tot.totalSupply();
+              const prevTotBalance = await this.tot.balanceOf(rootchain.address);
+
+              // 1. make a withdrawal request
+              expect(await this.depositManager.pendingUnstaked(rootchain.address, tokenOwner)).to.be.bignumber.equal('0');
+              expect(await this.depositManager.accUnstaked(rootchain.address, tokenOwner)).to.be.bignumber.equal('0');
+
+              const tx = await this.depositManager.requestWithdrawal(rootchain.address, amount, { from: tokenOwner });
+
+              expectEvent.inLogs(
+                tx.logs,
+                'WithdrawalRequested',
+                {
+                  rootchain: rootchain.address,
+                  depositor: tokenOwner,
+                  amount: amount,
+                },
+              );
+
+              const { args: { coinageBurnAmount, totBurnAmount } } = await expectEvent.inTransaction(tx.tx, this.seigManager, 'UnstakeLog');
+
+              console.log('coinageBurnAmount  ', coinageBurnAmount.toString(10).padStart(35));
+              console.log('totBurnAmount      ', totBurnAmount.toString(10).padStart(35));
+              console.log('diff               ', toBN(totBurnAmount).sub(toBN(coinageBurnAmount)).toString(10).padStart(35));
+
+              expect(await this.depositManager.pendingUnstaked(rootchain.address, tokenOwner)).to.be.bignumber.equal(amount);
+              expect(await this.depositManager.accUnstaked(rootchain.address, tokenOwner)).to.be.bignumber.equal('0');
+
+              // 2. process the request
+              await expectRevert(this.depositManager.processRequest(rootchain.address, { from: tokenOwner }), 'DepositManager: wait for withdrawal delay');
+
+              await Promise.all(range(WITHDRAWAL_DELAY + 1).map(_ => time.advanceBlock()));
+
+              expectEvent(
+                await this.depositManager.processRequest(rootchain.address, { from: tokenOwner }),
+                'WithdrawalProcessed',
+                {
+                  rootchain: rootchain.address,
+                  depositor: tokenOwner,
+                  amount: amount,
+                },
+              );
+
+              expect(await this.depositManager.pendingUnstaked(rootchain.address, tokenOwner)).to.be.bignumber.equal('0');
+              expect(await this.depositManager.accUnstaked(rootchain.address, tokenOwner)).to.be.bignumber.equal(amount);
+
+              const curWTONBalance = await this.wton.balanceOf(tokenOwner);
+              const curCoinageTotalSupply = await coinage.totalSupply();
+              const curCoinageBalance = await coinage.balanceOf(tokenOwner);
+              const curTotTotalSupply = await this.tot.totalSupply();
+              const curTotBalance = await this.tot.balanceOf(rootchain.address);
+
+              // 3. check tokens status
+              expect(curWTONBalance.sub(prevWTONBalance))
+                .to.be.bignumber.equal(amount);
+
+              expect(curCoinageTotalSupply.sub(prevCoinageTotalSupply))
+                .to.be.bignumber.equal(amount.neg());
+
+              expect(curCoinageBalance.sub(prevCoinageBalance))
+                .to.be.bignumber.equal(amount.neg());
+
+              checkBalance(
+                prevTotTotalSupply.sub(curTotTotalSupply),
+                _WTON(amount.add(precomitted), WTON_UNIT),
+                WTON_UNIT,
+              );
+
+              checkBalance(
+                prevTotBalance.sub(curTotBalance),
+                _WTON(amount.add(precomitted), WTON_UNIT),
+                WTON_UNIT,
+              );
             });
           }
         });
       }
-
-      // describe('when 0-th root chain runs', function () {
-      //   const i = 0;
-
-      //   describe('when commits 1 NRE', function () {
-      //     it('should submit NRE', async function () {
-      //       const rootchain = this.rootchains[i];
-      //       await this._commit(rootchain);
-      //     });
-      //   });
-
-      //   describe('when commits 2 NREs', function () {
-      //     it('should submit NREs', async function () {
-      //       const rootchain = this.rootchains[i];
-      //       await this._commit(rootchain);
-      //       await this._commit(rootchain);
-      //     });
-      //   });
-      // });
     });
   });
 });

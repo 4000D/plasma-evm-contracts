@@ -10,6 +10,7 @@ import { RootChainRegistry } from "./RootChainRegistry.sol";
 import { SeigManager } from "./SeigManager.sol";
 
 // TODO: add events
+// TODO: check deposit/withdraw WTON amount (1e27)
 
 /**
  * @dev DepositManager manages WTON deposit and withdrawal from operator and WTON holders.
@@ -22,17 +23,23 @@ contract DepositManager is Ownable {
   RootChainRegistry public registry;
   SeigManager public seigManager;
 
+  // accumulated staked amount
   // rootchian => msg.sender => wton amount
-  mapping (address => mapping (address => uint256)) public deposits;
+  mapping (address => mapping (address => uint256)) public accStaked;
+
+  // pending unstaked amount
+  // rootchian => msg.sender => wton amount
+  mapping (address => mapping (address => uint256)) public pendingUnstaked;
+
+  // accumulated unstaked amount
+  // rootchian => msg.sender => wton amount
+  mapping (address => mapping (address => uint256)) public accUnstaked;
 
   // rootchain => msg.sender => withdrawal requests
   mapping (address => mapping (address => WithdrawalReqeust[])) public withdrawalReqeusts;
 
   // rootchain => msg.sender => index
   mapping (address => mapping (address => uint256)) public withdrawalRequestIndex;
-
-  uint256 public totalPendingWithdrawalAmount;
-  mapping (address => uint256) public pendingWithdrawalAmount;
 
   // withdrawal delay in block number
   // @TODO: change delay unit to CYCLE?
@@ -80,7 +87,7 @@ contract DepositManager is Ownable {
    * @dev deposit `amount` WTON in RAY
    */
   function deposit(address rootchain, uint256 amount) public onlyRootChain(rootchain) returns (bool) {
-    deposits[rootchain][msg.sender] = deposits[rootchain][msg.sender].add(amount);
+    accStaked[rootchain][msg.sender] = accStaked[rootchain][msg.sender].add(amount);
 
     wton.safeTransferFrom(msg.sender, address(this), amount);
 
@@ -91,8 +98,9 @@ contract DepositManager is Ownable {
     return true;
   }
 
+
   function requestWithdrawal(address rootchain, uint256 amount) public onlyRootChain(rootchain) returns (bool) {
-    deposits[rootchain][msg.sender] = deposits[rootchain][msg.sender].sub(amount);
+    // TODO: check `amount` WTON can be withdrawable
 
     withdrawalReqeusts[rootchain][msg.sender].push(WithdrawalReqeust({
       withdrawableBlockNumber: uint128(block.number + WITHDRAWAL_DELAY),
@@ -100,13 +108,14 @@ contract DepositManager is Ownable {
       processed: false
     }));
 
-    totalPendingWithdrawalAmount = totalPendingWithdrawalAmount.add(amount);
-    pendingWithdrawalAmount[rootchain] = pendingWithdrawalAmount[rootchain].add(amount);
-
+    pendingUnstaked[rootchain][msg.sender] = pendingUnstaked[rootchain][msg.sender].add(amount);
     emit WithdrawalRequested(rootchain, msg.sender, amount);
+    require(seigManager.onUnstake(rootchain, msg.sender, amount));
+
+    return true;
   }
 
-  function processRequest(address rootchain) public {
+  function processRequest(address rootchain) public returns (bool) {
     uint256 index = withdrawalRequestIndex[rootchain][msg.sender];
     require(withdrawalReqeusts[rootchain][msg.sender].length > index, "DepositManager: no request to process");
 
@@ -117,35 +126,28 @@ contract DepositManager is Ownable {
 
     withdrawalRequestIndex[rootchain][msg.sender] += 1;
 
-    totalPendingWithdrawalAmount = totalPendingWithdrawalAmount.sub(r.amount);
-    pendingWithdrawalAmount[rootchain] = pendingWithdrawalAmount[rootchain].sub(r.amount);
+    uint256 amount = r.amount;
 
-    wton.safeTransfer(msg.sender, r.amount);
+    pendingUnstaked[rootchain][msg.sender] = pendingUnstaked[rootchain][msg.sender].sub(amount);
+    accUnstaked[rootchain][msg.sender] = accUnstaked[rootchain][msg.sender].add(amount);
 
-    emit WithdrawalProcessed(rootchain, msg.sender, r.amount);
-  }
+    wton.safeTransfer(msg.sender, amount);
 
-  /**
-   * @dev unstake or claim rewards
-   */
-  function unstake(address rootchain, uint256 amount) public onlyRootChain(rootchain) returns (bool) {
-    require(seigManager.onUnstake(rootchain, msg.sender, amount));
-
-    deposits[rootchain][msg.sender] = deposits[rootchain][msg.sender].add(amount);
+    emit WithdrawalProcessed(rootchain, msg.sender, amount);
     return true;
   }
 
-  function unstakeAll(address rootchain) external onlyRootChain(rootchain) returns (bool) {
+  function requestWithdrawalAll(address rootchain) external onlyRootChain(rootchain) returns (bool) {
     uint256 amount = seigManager.stakeOf(rootchain, msg.sender);
 
-    unstake(rootchain, amount);
-    return true;
+    return requestWithdrawal(rootchain, amount);
   }
 
-  function processRequests(address rootchain, uint256 n) external {
+  function processRequests(address rootchain, uint256 n) external returns (bool) {
     for (uint256 i = 0; i < n; i++) {
       processRequest(rootchain);
     }
+    return true;
   }
 
   function _isOperator(address rootchain, address operator) internal view returns (bool) {

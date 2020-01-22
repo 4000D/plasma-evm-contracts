@@ -4,6 +4,7 @@ import { Ownable } from "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { IERC20 } from "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import { ERC20Mintable } from "openzeppelin-solidity/contracts/token/ERC20/ERC20Mintable.sol";
+import { ERC20Burnable } from "openzeppelin-solidity/contracts/token/ERC20/ERC20Burnable.sol";
 import { ERC20Detailed } from "openzeppelin-solidity/contracts/token/ERC20/ERC20Detailed.sol";
 import { SafeERC20 } from "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
 import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol";
@@ -14,7 +15,7 @@ import { SeigManagerI } from "./SeigManagerI.sol";
 import { SeigToken } from "./SeigToken.sol";
 
 
-contract WTON is DSMath, Ownable, ReentrancyGuard, ERC20Mintable, ERC20Detailed, SeigToken {
+contract WTON is DSMath, Ownable, ReentrancyGuard, ERC20Mintable, ERC20Burnable, ERC20Detailed, SeigToken {
   using SafeERC20 for IERC20;
 
   IERC20 public ton;
@@ -29,9 +30,22 @@ contract WTON is DSMath, Ownable, ReentrancyGuard, ERC20Mintable, ERC20Detailed,
     ton = _ton;
   }
 
-  // function mint(address, uint256) public returns (bool) {
-  //   revert("WTON: minting token is not allowed");
-  // }
+  //////////////////////
+  // Override ERC20 functions
+  //////////////////////
+
+  function burnFrom(address account, uint256 amount) public {
+    if (isMinter(msg.sender)) {
+      _burn(account, amount);
+      return;
+    }
+
+    super.burnFrom(account, amount);
+  }
+
+  //////////////////////
+  // Swap functions
+  //////////////////////
 
   /**
    * @dev swap WTON to TON
@@ -61,6 +75,10 @@ contract WTON is DSMath, Ownable, ReentrancyGuard, ERC20Mintable, ERC20Detailed,
   function swapFromTONAndTransfer(address to, uint256 tonAmount) public nonReentrant returns (bool) {
     return _swapFromTON(to, tonAmount);
   }
+
+  //////////////////////
+  // Internal functions
+  //////////////////////
 
   function _swapToTON(address to, uint256 wtonAmount) internal returns (bool) {
     _burn(msg.sender, wtonAmount);

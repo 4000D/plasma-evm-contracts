@@ -13,6 +13,10 @@ contract SeigToken is ERC20, Ownable {
     seigManager = _seigManager;
   }
 
+  //////////////////////
+  // Override ERC20 functions
+  //////////////////////
+
   function _transfer(address sender, address recipient, uint256 amount) internal {
     super._transfer(sender, recipient, amount);
     if (address(seigManager) != address(0)) {
