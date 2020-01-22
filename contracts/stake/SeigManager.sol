@@ -251,18 +251,19 @@ contract SeigManager  is DSMath, Ownable {
   }
 
   //////////////////////////////
-  // Public and internal fuhnctions
+  // Public and internal functions
   //////////////////////////////
 
-  function uncomittedRewardOf(address rootchain, address depositor) public view returns (uint256) {
+  function uncomittedStakeOf(address rootchain, address depositor) public view returns (uint256) {
     CustomIncrementCoinage coinage = coinages[rootchain];
 
+    uint256 prevFactor = coinage.factor();
     uint256 prevTotalSupply = coinage.totalSupply();
     uint256 nextTotalSupply = tot.balanceOf(rootchain);
-    uint256 newFactor = rdiv(nextTotalSupply, prevTotalSupply);
+    uint256 newFactor = _calcNewFactor(prevTotalSupply, nextTotalSupply, prevFactor);
 
     uint256 uncomittedBalance = rmul(
-      rdiv(coinage.balanceOf(depositor), coinage.factor()),
+      rdiv(coinage.balanceOf(depositor), prevFactor),
       newFactor
     );
 
@@ -270,17 +271,8 @@ contract SeigManager  is DSMath, Ownable {
       .sub(coinages[rootchain].balanceOf(depositor));
   }
 
-  function rewardOf(address rootchain, address depositor) public view returns (uint256) {
-    return coinages[rootchain].balanceOf(depositor).sub(depositManager.deposits(rootchain, depositor));
-  }
-
-  function _onstake() internal returns (bool) {
-
-  }
-
-  function _getStakeStats() internal returns (uint256 stakedAmount, uint256 unstakedAmount) {
-    stakedAmount = wton.balanceOf(address(depositManager));
-    unstakedAmount = wton.totalSupply().sub(stakedAmount);
+  function stakeOf(address rootchain, address depositor) public view returns (uint256) {
+    return coinages[rootchain].balanceOf(depositor);
   }
 
   function _calcNewFactor(uint256 source, uint256 target, uint256 oldFactor) internal pure returns (uint256) {

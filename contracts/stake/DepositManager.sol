@@ -136,14 +136,11 @@ contract DepositManager is Ownable {
   }
 
   function unstakeAll(address rootchain) external onlyRootChain(rootchain) returns (bool) {
-    uint256 amount;
-
-    // TODO: calculate unstakable amount
+    uint256 amount = seigManager.stakeOf(rootchain, msg.sender);
 
     unstake(rootchain, amount);
     return true;
   }
-
 
   function processRequests(address rootchain, uint256 n) external {
     for (uint256 i = 0; i < n; i++) {
