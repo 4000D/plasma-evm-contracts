@@ -30,11 +30,19 @@ const toBN = web3.utils.toBN;
 const LOGTX = process.env.LOGTX || false;
 const VERBOSE = process.env.VERBOSE || false;
 
+const log = (...args) => LOGTX && console.log(...args);
+
+let o;
+process.on('exit', function () {
+  console.log(o);
+});
 const development = true;
 
 const _TON = createCurrency('TON');
 const _WTON = createCurrency('WTON');
 const _WTON_TON = createCurrencyRatio(_WTON, _TON);
+
+const e = web3.utils.toBN('1000000000'); // 1e9
 
 const TON_UNIT = 'wei';
 const WTON_UNIT = 'ray';
@@ -67,8 +75,6 @@ class RootChainState {
     this.NRE_LENGTH = Number(NRE_LENGTH);
   }
 }
-
-const e = web3.utils.toBN('1000000000'); // 1e9
 
 describe.only('stake/SeigManager', function () {
   function makePos (v1, v2) { return toBN(v1).shln(128).add(toBN(v2)); }
@@ -195,20 +201,6 @@ describe.only('stake/SeigManager', function () {
     this._commit = (rootchain) => submitDummyNRE(rootchain, this.rootchainState[rootchain.address]);
   });
 
-  // local variables
-  beforeEach(async function () {
-    // load seig block for each root chain
-    this.previousSeigBlocks = {};
-    this.currentSeigBlocks = {};
-    for (const rootchain of this.rootchains) {
-      this.previousSeigBlocks[rootchain.address] = await this.seigManager.lastSeigBlock();
-      this.currentSeigBlocks[rootchain.address] = this.previousSeigBlocks[rootchain.address];
-    }
-
-    // accumulated seigniorages
-    this.accSeig = _WTON('0');
-  });
-
   describe('when the token owner is the only depositor of each root chain', function () {
     beforeEach(async function () {
       await this.wton.swapFromTONAndTransfer(tokenOwner, tokwnOwnerInitialBalance.toFixed(TON_UNIT));
@@ -257,25 +249,29 @@ describe.only('stake/SeigManager', function () {
         }
       });
 
-      for (const i in range(NUM_ROOTCHAINS)) {
-        const indices = range(0, Number(i) + 1);
+      // multiple root chains test
+      for (const _i in range(NUM_ROOTCHAINS)) {
+        const i = Number(_i);
+        const indices = range(0, i + 1);
         const c = indices.map(i => `${i}-th`).join(', ');
 
         describe(`when ${c} root chains commits first ORE each`, function () {
           beforeEach(async function () {
             this.previousSeigBlock = await this.seigManager.lastSeigBlock();
-            this.previousTotTotalSupply = await this.tot.totalSupply();
 
-            this.currentTotBalances = {}; // track tot balance when root chain is comitted
+            this.totBalancesAtCommit = {}; // track tot balance when root chain is comitted
+            this.accSeig = _WTON('0');
+            this.seigs = [];
+
+            o = '';
 
             for (const i of indices) {
               const rootchain = this.rootchains[i];
 
               const sb0 = await this.seigManager.lastSeigBlock();
+              const prevTotTotalSupply = await this.tot.totalSupply();
 
               const prevBalance = await this.tot.balanceOf(rootchain.address);
-
-              this.previousSeigBlocks[rootchain.address] = await this.seigManager.lastSeigBlock();
 
               await time.advanceBlock();
               await time.advanceBlock();
@@ -283,123 +279,152 @@ describe.only('stake/SeigManager', function () {
               const { tx } = await this._commit(rootchain);
 
               const sb1 = await this.seigManager.lastSeigBlock();
+              const curTotTotalSupply = await this.tot.totalSupply();
 
-              this.currentTotBalances[rootchain.address] = await this.tot.balanceOf(rootchain.address);
+              const curBalance = await this.tot.balanceOf(rootchain.address);
 
-              this.currentSeigBlocks[rootchain.address] = await this.seigManager.lastSeigBlock();
+              this.totBalancesAtCommit[rootchain.address] = curBalance;
 
-              const { args: { totalStakedAmount, totalSupplyOfWTON, prevTotalSupply, nextTotalSupply } } = await expectEvent.inTransaction(tx, this.seigManager, 'CommitLog1');
+              const { args: { totalStakedAmount: _totalStakedAmount, totalSupplyOfWTON, prevTotalSupply, nextTotalSupply } } = await expectEvent.inTransaction(tx, this.seigManager, 'CommitLog1');
 
               const { args: { totalSeig, stakedSeig, unstakedSeig } } = await expectEvent.inTransaction(tx, this.seigManager, 'SeigGiven');
 
               const { args: { previous, current } } = await expectEvent.inTransaction(tx, this.tot, 'FactorSet');
 
-              console.log(`
-              ${i}-th root chain first commit
+              const seig = _WTON(stakedSeig, WTON_UNIT);
 
-              totalStakedAmount     : ${_WTON(totalStakedAmount, 'ray').toString().padStart(15)}
-              totalSupplyOfWTON     : ${_WTON(totalSupplyOfWTON, 'ray').toString().padStart(15)}
-              prevTotalSupply       : ${_WTON(prevTotalSupply, 'ray').toString().padStart(15)}
-              nextTotalSupply       : ${_WTON(nextTotalSupply, 'ray').toString().padStart(15)}
+              checkBalance(curTotTotalSupply.sub(prevTotTotalSupply), seig, WTON_UNIT);
 
-              tot.totalSupply       : ${_WTON(await this.tot.totalSupply(), 'ray').toString().padStart(15)}
+              this.seigs.push(seig);
+              this.accSeig = this.accSeig.plus(seig);
 
-              ${'-'.repeat(40)}
+              // test log....s
+              const accSeigAtCommit = this.seigs.slice(0, i + 1).reduce((a, b) => a.plus(b));
+              const accSeig = this.accSeig;
 
-              previous factor       : ${_WTON(previous, 'ray').toString().padStart(15)}
-              current factor        : ${_WTON(current, 'ray').toString().padStart(15)}
+              o += `\n\n\n
+    ${'-'.repeat(40)}
+    ${i}-th root chain first commit
+    ${'-'.repeat(40)}
 
-              ${'-'.repeat(40)}
+    totalStakedAmount     : ${_WTON(_totalStakedAmount, 'ray').toString().padStart(15)}
+    totalSupplyOfWTON     : ${_WTON(totalSupplyOfWTON, 'ray').toString().padStart(15)}
+    prevTotalSupply       : ${_WTON(prevTotalSupply, 'ray').toString().padStart(15)}
+    nextTotalSupply       : ${_WTON(nextTotalSupply, 'ray').toString().padStart(15)}
 
-              prevBalance           : ${_WTON(prevBalance, 'ray').toString().padStart(15)}
-              curBalance            : ${_WTON(this.currentTotBalances[rootchain.address], 'ray').toString().padStart(15)}
+    tot.totalSupply       : ${_WTON(await this.tot.totalSupply(), 'ray').toString().padStart(15)}
 
-              ${'-'.repeat(40)}
+    ${'-'.repeat(40)}
 
-              previous seig block : ${sb0}
-              current seig block  : ${sb1}
-              numBlocks           : ${sb1.sub(sb0)}
+    previous factor       : ${_WTON(previous, 'ray').toString().padStart(15)}
+    current factor        : ${_WTON(current, 'ray').toString().padStart(15)}
 
-              seigPerBlock        : ${_WTON(await this.seigManager.seigPerBlock(), 'ray').toString().padStart(15)}
-              totalSeig           : ${_WTON(totalSeig, 'ray').toString().padStart(15)}
-              stakedSeig          : ${_WTON(stakedSeig, 'ray').toString().padStart(15)}
-              unstakedSeig        : ${_WTON(unstakedSeig, 'ray').toString().padStart(15)}
+    ${'-'.repeat(40)}
 
-              ${'='.repeat(40)}
-              ${'='.repeat(40)}
-              `);
+    prevBalance           : ${_WTON(prevBalance, 'ray').toString().padStart(15)}
+    curBalance            : ${_WTON(curBalance, 'ray').toString().padStart(15)}
+
+    ${'-'.repeat(40)}
+
+    previous seig block : ${sb0}
+    current seig block  : ${sb1}
+    numBlocks           : ${sb1.sub(sb0)}
+
+    seigPerBlock        : ${_WTON(await this.seigManager.seigPerBlock(), 'ray').toString().padStart(15)}
+    totalSeig           : ${_WTON(totalSeig, 'ray').toString().padStart(15)}
+    stakedSeig          : ${_WTON(stakedSeig, 'ray').toString().padStart(15)}
+    unstakedSeig        : ${_WTON(unstakedSeig, 'ray').toString().padStart(15)}
+
+    ${'-'.repeat(40)}
+
+    this.seigs          : ${this.seigs.toString().padStart(15)}
+    this.accSeig        : ${this.accSeig.toString().padStart(15)}
+    accSeigAtCommit     : ${accSeigAtCommit.toString().padStart(15)}
+    accSeig             : ${accSeig.toString().padStart(15)}
+
+    ${'='.repeat(40)}
+    `;
             }
 
             this.currentSeigBlock = await this.seigManager.lastSeigBlock();
-            this.currentTotTotalSupply = await this.tot.totalSupply();
           });
 
-          afterEach(async function () {
-            delete this.currentTotBalances;
+          for (const _i in indices) {
+            const i = Number(_i);
+            it(`${i}-th root chain: check amount of total supply, balance, staked amount, uncomitted amount`, async function () {
+              const rootchain = this.rootchains[i];
 
-            delete this.previousSeigBlock;
-            delete this.currentSeigBlock;
+              const accSeigAtCommit = this.seigs.slice(0, i + 1).reduce((a, b) => a.plus(b));
+              const balnceAtCommit = tokenAmount.times(WTON_TON_RATIO)
+                .plus(accSeigAtCommit.div(NUM_ROOTCHAINS));
 
-            delete this.previousTotTotalSupply;
-            delete this.currentTotTotalSupply;
-          });
+              const accSeig = this.accSeig;
+              const balanceAtCurrent = tokenAmount.times(WTON_TON_RATIO)
+                .plus(accSeig.div(NUM_ROOTCHAINS));
 
-          for (const i in indices) {
-            it(`${i}-th root chain: tot balance of root chain and coinage balance of token owner should be increased`, async function () {
-              const rootchain = this.rootchains[Number(i)];
-
-              const nBlocks = this.currentSeigBlocks[rootchain.address].sub(this.previousSeigBlocks[rootchain.address]).toNumber();
-
-              const totalSeig = SEIG_PER_BLOCK.times(nBlocks)
-                .times(totalStakedAmount.times(WTON_TON_RATIO).plus(this.accSeig))
-                .div(TON_INITIAL_SUPPLY.times(WTON_TON_RATIO).plus(this.accSeig));
-
-              this.accSeig = this.accSeig.plus(totalSeig);
-
-              console.log(`
-              totalSeig     : ${totalSeig.toString().padStart(15)}
-              this.accSeig  : ${this.accSeig.toString().padStart(15)}
-              `);
-
-              const expectedBalance = tokenAmount.times(WTON_TON_RATIO)
-                .plus(this.accSeig.div(NUM_ROOTCHAINS));
-
+              // tot balance of a root chain
               checkBalance(
-                this.currentTotBalances[rootchain.address],
-                expectedBalance,
+                this.totBalancesAtCommit[rootchain.address],
+                balnceAtCommit,
                 WTON_UNIT,
               );
 
-              await checkBalanceProm(
-                this.coinagesByRootChain[rootchain.address].balanceOf(tokenOwner),
-                expectedBalance,
+              // coinage total supply
+              checkBalance(
+                await this.coinagesByRootChain[rootchain.address].totalSupply(),
+                balnceAtCommit,
+                WTON_UNIT,
+              );
+
+              // coinage balance of the tokwn owner
+              checkBalance(
+                await this.coinagesByRootChain[rootchain.address].balanceOf(tokenOwner),
+                balnceAtCommit,
+                WTON_UNIT,
+              );
+
+              // staked amount of the token owner
+              checkBalance(
+                await this.seigManager.stakeOf(rootchain.address, tokenOwner),
+                balnceAtCommit,
+                WTON_UNIT,
+              );
+
+              // uncomitted amount of the tokwn owner
+              checkBalance(
+                await this.seigManager.uncomittedStakeOf(rootchain.address, tokenOwner),
+                balanceAtCurrent.minus(balnceAtCommit),
                 WTON_UNIT,
               );
             });
 
-            it.only(`${i}-th root chain: the tokwn owner should claim seigniorage`, async function () {
-              const rootchain = this.rootchains[Number(i)];
+            it(`${i}-th root chain: the tokwn owner should claim staked amount`, async function () {
+              const rootchain = this.rootchains[i];
 
-              const nBlocks = this.currentSeigBlocks[rootchain.address].sub(this.previousSeigBlocks[rootchain.address]).toNumber();
-
-              const totalSeig = SEIG_PER_BLOCK.times(nBlocks)
-                .times(totalStakedAmount.times(WTON_TON_RATIO).plus(this.accSeig))
-                .div(TON_INITIAL_SUPPLY.times(WTON_TON_RATIO).plus(this.accSeig));
-
-              this.accSeig = this.accSeig.plus(totalSeig);
-
-              const expectedBalance = tokenAmount.times(WTON_TON_RATIO)
-                .plus(this.accSeig.div(NUM_ROOTCHAINS));
-
-              await checkBalanceProm(
-                this.seigManager.stakeOf(rootchain.address, tokenOwner),
-                expectedBalance,
-                WTON_UNIT,
-              );
+              const amount = await this.seigManager.stakeOf(rootchain.address, tokenOwner);
             });
           }
         });
       }
+
+      // describe('when 0-th root chain runs', function () {
+      //   const i = 0;
+
+      //   describe('when commits 1 NRE', function () {
+      //     it('should submit NRE', async function () {
+      //       const rootchain = this.rootchains[i];
+      //       await this._commit(rootchain);
+      //     });
+      //   });
+
+      //   describe('when commits 2 NREs', function () {
+      //     it('should submit NREs', async function () {
+      //       const rootchain = this.rootchains[i];
+      //       await this._commit(rootchain);
+      //       await this._commit(rootchain);
+      //     });
+      //   });
+      // });
     });
   });
 });
