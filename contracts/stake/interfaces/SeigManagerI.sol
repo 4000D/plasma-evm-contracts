@@ -8,6 +8,7 @@ import { RootChainI } from "../../RootChainI.sol";
 
 import { RootChainRegistryI } from "./RootChainRegistryI.sol";
 import { DepositManagerI } from "./DepositManagerI.sol";
+import { PowerTONI } from "./PowerTONI.sol";
 
 
 interface SeigManagerI {
@@ -15,6 +16,7 @@ interface SeigManagerI {
   function depositManager() external view returns (DepositManagerI);
   function ton() external view returns (IERC20);
   function wton() external view returns (ERC20Mintable);
+  function powerton() external view returns (PowerTONI);
   function tot() external view returns (CustomIncrementCoinage);
   function coinages(address rootchain) external view returns (CustomIncrementCoinage);
 
@@ -31,7 +33,7 @@ interface SeigManagerI {
 
   function onTransfer(address sender, address recipient, uint256 amount) external returns (bool);
   function onCommit() external returns (bool);
-  function onStake(address rootchain, address account, uint256 amount) external returns (bool);
-  function onUnstake(address rootchain, address account, uint256 amount) external returns (bool);
+  function onDeposit(address rootchain, address account, uint256 amount) external returns (bool);
+  function onWithdraw(address rootchain, address account, uint256 amount) external returns (bool);
 
 }
