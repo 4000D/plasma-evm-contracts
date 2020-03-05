@@ -414,7 +414,7 @@ contract SeigManager is SeigManagerI, DSMath, Ownable, Pausable, AuthController 
 
     uint256 unstakedSeig = maxSeig.sub(stakedSeig);
     if (address(_powerton) != address(0)) {
-      // _wton.mint(address(_powerton), unstakedSeig);
+      _wton.mint(address(_powerton), unstakedSeig);
     }
 
     emit SeigGiven(msg.sender, maxSeig, stakedSeig, unstakedSeig);
